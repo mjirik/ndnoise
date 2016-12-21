@@ -7,15 +7,45 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 
-def generate(shape, amplitude=101, return_spectrum=True):
+def generate(shape, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1):
+    """
+    Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
+    The specter is filtered based on power function of frequency. This is controled by exponent parameter.
+    Then lowpass and hipass filter are applied.
+
+    :param shape: size of output data
+    :param return_spectrum:
+    :param random_generator_seed:
+
+    For other parameters see process_specturum_seed().
+    :return:
+    """
+
+    if random_generator_seed is not None:
+        np.random.seed(seed=random_generator_seed)
     spectrum = generate_spectrum_seed(shape)
-    signal, filter, spectrum = process_spectrum_seed(spectrum)
+    signal, filter, spectrum = process_spectrum_seed(
+        spectrum,
+        exponent=exponent,
+        freq_start=freq_start,
+        freq_range=freq_range
+    )
 
     if return_spectrum:
         return signal, filter, spectrum
     return signal
 
 def process_spectrum_seed(spectrum, exponent=0, freq_start=0, freq_range=None):
+    """
+    Filter spectrum based on frequency
+    :param spectrum:
+    :param exponent:
+    :param freq_start:
+    :param freq_range:
+    :return:
+    """
+    if freq_range< 0:
+        freq_range = None
     dist = construct_filter_dist(spectrum.shape)
 
     shspectrum = np.fft.fftshift(spectrum)
@@ -77,7 +107,7 @@ def show(real_signal, filter_shifted=None, spectrum=None, log_view=False):
     ax.set_title("imag")
 
 
-    plt.show()
+    # plt.show()
 
 def apply_filter_on_abs(shspectrum, filter):
     radii, angle = R2P(shspectrum)
@@ -119,14 +149,19 @@ def hipass_filter(shape, radius, dist=None):
     output = dist > radius
     return output
 
-def construct_filter_dist(shape):
+# TODO voxelsize dependency
+def construct_filter_dist(shape): #, voxelsize=None):
+    # if voxelsize is None:
+    #     voxelsize = np.ones(len(shape))
+
+
     center = (np.asarray(shape) - 1) / 2.0
 
 
     xi = []
     for i in range(len(shape)):
         xi.append(range(shape[i]))
-    yi = np.meshgrid(*xi)
+    yi = np.meshgrid(*xi, indexing='ij')
 
     dist = np.zeros(shape)
     for i in range(len(shape)):
