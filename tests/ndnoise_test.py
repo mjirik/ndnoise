@@ -48,7 +48,7 @@ class MyTestCase(unittest.TestCase):
         )
 
         plt.imshow(noise[5,:,:])
-        plt.show()
+        # plt.show()
 
         # self.assertEqual(True, False)
 
