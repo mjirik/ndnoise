@@ -3,6 +3,7 @@ import unittest
 import sed3
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.signal
 
 import ndnoise
 
@@ -13,6 +14,13 @@ class MyTestCase(unittest.TestCase):
 
         ndnoise.show(noise, filter, spectrum)
         # self.assertEqual(True, False)
+
+    def test_butter(self):
+        b, a = scipy.signal.butter(4, [0, 10000], btype='band', analog=True)
+        w, h = scipy.signal.freqs(b, a)
+        plt.plot(w, abs(h))
+        plt.show()
+
 
     def test_voxelsize(self):
         import scipy.misc
