@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 
-def generate(shape, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1):
+def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed=None, exponent=0, lambda_start=0, lambda_range=-1):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -20,12 +20,18 @@ def generate(shape, return_spectrum=False, random_generator_seed=None, exponent=
     For other parameters see process_specturum_seed().
     :return:
     """
+    if voxelsize is None:
+        voxelsize = np.ones([1, len(shape)])
+
+    freq_start = 1.0/lambda_start
+    freq_range = 1.0/lambda_range
 
     if random_generator_seed is not None:
         np.random.seed(seed=random_generator_seed)
     spectrum = generate_spectrum_seed(shape)
     signal, filter, spectrum = process_spectrum_seed(
         spectrum,
+        voxelsize=voxelsize,
         exponent=exponent,
         freq_start=freq_start,
         freq_range=freq_range
@@ -35,7 +41,7 @@ def generate(shape, return_spectrum=False, random_generator_seed=None, exponent=
         return signal, filter, spectrum
     return signal
 
-def process_spectrum_seed(spectrum, exponent=0, freq_start=0, freq_range=None):
+def process_spectrum_seed(spectrum, voxelsize=None, exponent=0, freq_start=0, freq_range=None):
     """
     Filter spectrum based on frequency
     :param spectrum:
@@ -46,7 +52,11 @@ def process_spectrum_seed(spectrum, exponent=0, freq_start=0, freq_range=None):
     """
     if freq_range< 0:
         freq_range = None
-    dist = construct_filter_dist(spectrum.shape)
+
+    if voxelsize is None:
+        voxelsize = np.ones([1, len(spectrum.shape)])
+
+    dist = construct_filter_dist(spectrum.shape, voxelsize=voxelsize)
 
     shspectrum = np.fft.fftshift(spectrum)
     pfilter = power_filter(shspectrum.shape, exponent)
@@ -132,35 +142,36 @@ def apply_filter_on_abs(shspectrum, filter):
 
 
 def power_filter(shape, e, dist=None):
-    if dist is None:
-        dist = construct_filter_dist(shape)
+    # if dist is None:
+    #     dist = construct_filter_dist(shape)
     output = np.power(dist, e)
     return output
 
 def lopass_filter(shape, radius, dist=None):
-    if dist is None:
-        dist = construct_filter_dist(shape)
+    # if dist is None:
+    #     dist = construct_filter_dist(shape)
     output = dist < radius
     return output
 
 def hipass_filter(shape, radius, dist=None):
-    if dist is None:
-        dist = construct_filter_dist(shape)
+    # if dist is None:
+    #     dist = construct_filter_dist(shape)
     output = dist > radius
     return output
 
 # TODO voxelsize dependency
-def construct_filter_dist(shape): #, voxelsize=None):
-    # if voxelsize is None:
-    #     voxelsize = np.ones(len(shape))
+def construct_filter_dist(shape, voxelsize=None):
+    voxelsize = np.asarray(voxelsize, dtype=np.float)
+    if voxelsize is None:
+        voxelsize = np.ones(len(shape))
 
 
-    center = (np.asarray(shape) - 1) / 2.0
+    center = (np.asarray(shape)/voxelsize - 1) / 2.0
 
 
     xi = []
     for i in range(len(shape)):
-        xi.append(range(shape[i]))
+        xi.append(range(shape[i])/voxelsize[i])
     yi = np.meshgrid(*xi, indexing='ij')
 
     dist = np.zeros(shape)

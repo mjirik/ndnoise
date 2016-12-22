@@ -14,12 +14,31 @@ class MyTestCase(unittest.TestCase):
         ndnoise.show(noise, filter, spectrum)
         # self.assertEqual(True, False)
 
+    def test_voxelsize(self):
+        import scipy.misc
+        lena = scipy.misc.ascent()
+        spectrum = np.fft.fftn(lena)
+
+        spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
+
+        out = ndnoise.generator.process_spectrum_seed(
+            spectrum,
+            voxelsize=[1, 2],
+            freq_start=0,
+            freq_range=10,
+            exponent=-1.5
+        )
+        signal, filter, spectrum = out
+
+        ndnoise.show(signal, filter, spectrum, log_view=True)
+
+
     def test_lena_filter(self):
         import scipy.misc
         lena = scipy.misc.ascent()
         spectrum = np.fft.fftn(lena)
 
-        spectrum = ndnoise.generator.generate_spectrum_seed([100,100])
+        spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
         out = ndnoise.generator.process_spectrum_seed(
             spectrum,
@@ -42,8 +61,8 @@ class MyTestCase(unittest.TestCase):
         noise = ndnoise.generate(
             [100,102,103],
             random_generator_seed=5,
-            freq_start=0,
-            freq_range=10,
+            lambda_start=0,
+            lambda_range=1/10.0,
             exponent=-1.5
         )
 
