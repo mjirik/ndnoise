@@ -1,37 +1,15 @@
 import unittest
 from scipy.signal import butter, lfilter, freqz
+import matplotlib.pyplot as plt
 import numpy as np
+import ndnoise.butternd
 
-
-def butter_bandpass(lowcut, highcut, fs, order=5):
-    nyq = 0.5 * fs
-    low = lowcut / nyq
-    high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
-    return b, a
-
-
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
-    return y
-
-def butter_bandpass_freq_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    dataf = np.fft.fft(data)
-    w, h = freqz(b, a, worN=len(dataf))
-    filtered_spectrum = dataf * h
-    filtered = np.fft.ifft(filtered_spectrum)
-    return np.abs(filtered)
 
 class MyTestCase(unittest.TestCase):
 
 
 
     def test_butter(self):
-        import numpy as np
-        import matplotlib.pyplot as plt
-        from scipy.signal import freqz
 
         # Sample rate and desired cutoff frequencies (in Hz).
         fs = 5000.0
@@ -42,16 +20,10 @@ class MyTestCase(unittest.TestCase):
         plt.figure(1)
         plt.clf()
         for order in [3, 6, 9]:
-            b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+            b, a = ndnoise.butternd.butter_bandpass(lowcut, highcut, fs, order=order)
             w, h = freqz(b, a, worN=2000)
             plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
 
-        plt.plot([0, 0.5 * fs], [np.sqrt(0.5), np.sqrt(0.5)],
-                 '--', label='sqrt(0.5)')
-        plt.xlabel('Frequency (Hz)')
-        plt.ylabel('Gain')
-        plt.grid(True)
-        plt.legend(loc='best')
 
         # Filter a noisy signal.
         T = 0.05
@@ -59,23 +31,45 @@ class MyTestCase(unittest.TestCase):
         t = np.linspace(0, T, nsamples, endpoint=False)
         a = 0.02
         f0 = 600.0
+
+        ys = a * np.cos(2 * np.pi * f0 * t + .11)
         x = 0.1 * np.sin(2 * np.pi * 1.2 * np.sqrt(t))
         x += 0.01 * np.cos(2 * np.pi * 312 * t + 0.1)
         x += a * np.cos(2 * np.pi * f0 * t + .11)
         x += 0.03 * np.cos(2 * np.pi * 2000 * t)
-        plt.figure(2)
-        plt.clf()
-        plt.plot(t, x, label='Noisy signal')
 
-        # y = butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
-        y = butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
-        plt.plot(t, y, label='Filtered signal (%g Hz)' % f0)
-        plt.xlabel('time (seconds)')
-        plt.hlines([-a, a], 0, T, linestyles='--')
-        plt.grid(True)
-        plt.axis('tight')
-        plt.legend(loc='upper left')
+        y1 = ndnoise.butternd.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
+        y2 = ndnoise.butternd.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
 
-        plt.show()
+        energy_ys = np.sum(ys**2)
+        energy_error_y1 = np.sum((ys - y1)**2)
+        energy_error_y2 = np.sum((ys - y2)**2)
+        energy_error_y2_y1 = np.sum((y1 - y2)**2)
+
+        self.assertLess(energy_error_y2_y1, energy_ys * 0.2, "Both filtered signals are similar")
+        # self.assertLess(energy_error_y1, energy_ys * 0.1)
+
+        # plt.plot([0, 0.5 * fs], [np.sqrt(0.5), np.sqrt(0.5)],
+        #          '--', label='sqrt(0.5)')
+        # plt.xlabel('Frequency (Hz)')
+        # plt.ylabel('Gain')
+        # plt.grid(True)
+        # plt.legend(loc='best')
+        #
+        # plt.figure(2)
+        # plt.clf()
+        # plt.plot(t, x, label='Noisy signal')
+        #
+        # plt.plot(t, ys, label='Original signal (%g Hz)' % f0)
+        # plt.plot(t, y1, label='Filtered signal (%g Hz)' % f0)
+        # plt.plot(t, y2 + 0.0, label='Filtered signal FFT (%g Hz)' % f0)
+        # plt.xlabel('time (seconds)')
+        # plt.hlines([-a, a], 0, T, linestyles='--')
+        # plt.grid(True)
+        # plt.axis('tight')
+        # plt.legend(loc='upper left')
+        #
+        # plt.show()
+
 if __name__ == '__main__':
     unittest.main()

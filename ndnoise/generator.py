@@ -41,6 +41,7 @@ def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed
         return signal, filter, spectrum
     return signal
 
+
 def process_spectrum_seed(spectrum, voxelsize=None, exponent=0, freq_start=0, freq_range=None):
     """
     Filter spectrum based on frequency
