@@ -2,7 +2,7 @@ import unittest
 from scipy.signal import butter, lfilter, freqz
 import matplotlib.pyplot as plt
 import numpy as np
-import ndnoise.butternd
+import ndnoise.filter
 
 
 class MyTestCase(unittest.TestCase):
@@ -20,7 +20,7 @@ class MyTestCase(unittest.TestCase):
         plt.figure(1)
         plt.clf()
         for order in [3, 6, 9]:
-            b, a = ndnoise.butternd.butter_bandpass(lowcut, highcut, fs, order=order)
+            b, a = ndnoise.filter.butter_bandpass(lowcut, highcut, fs, order=order)
             w, h = freqz(b, a, worN=2000)
             plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
 
@@ -38,8 +38,8 @@ class MyTestCase(unittest.TestCase):
         x += a * np.cos(2 * np.pi * f0 * t + .11)
         x += 0.03 * np.cos(2 * np.pi * 2000 * t)
 
-        y1 = ndnoise.butternd.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
-        y2 = ndnoise.butternd.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
+        y1 = ndnoise.filter.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
+        y2 = ndnoise.filter.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
 
         energy_ys = np.sum(ys**2)
         energy_error_y1 = np.sum((ys - y1)**2)

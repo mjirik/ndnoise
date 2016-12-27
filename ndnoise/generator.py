@@ -6,6 +6,7 @@ author: Miroslav Jirik
 import logging
 logger = logging.getLogger(__name__)
 import numpy as np
+import filter
 
 def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed=None, exponent=0, lambda_start=0, lambda_range=-1):
     """
@@ -57,15 +58,15 @@ def process_spectrum_seed(spectrum, voxelsize=None, exponent=0, freq_start=0, fr
     if voxelsize is None:
         voxelsize = np.ones([1, len(spectrum.shape)])
 
-    dist = construct_filter_dist(spectrum.shape, voxelsize=voxelsize)
+    dist = filter.construct_filter_dist(spectrum.shape, voxelsize=voxelsize)
 
     shspectrum = np.fft.fftshift(spectrum)
-    pfilter = power_filter(shspectrum.shape, exponent)
-    shspectrum = apply_filter(shspectrum, pfilter)
+    pfilter = filter.power_filter(shspectrum.shape, exponent)
+    shspectrum = filter.apply_filter(shspectrum, pfilter)
 
-    filter = hipass_filter(spectrum.shape, freq_start, dist=dist)
+    filter = filter.hipass_filter(spectrum.shape, freq_start, dist=dist)
     if freq_range is not None:
-        filter *= lopass_filter(spectrum.shape, freq_start + freq_range, dist=dist)
+        filter *= filter.lopass_filter(spectrum.shape, freq_start + freq_range, dist=dist)
     shspectrum *= filter
     spectrum = np.fft.ifftshift(shspectrum)
 
@@ -120,69 +121,3 @@ def show(real_signal, filter_shifted=None, spectrum=None, log_view=False):
 
     # plt.show()
 
-def apply_filter_on_abs(shspectrum, filter):
-    radii, angle = R2P(shspectrum)
-    radii *= filter
-    shspectrum = P2R(radii, angle)
-    return shspectrum
-
-def apply_filter(shspectrum, filter):
-    ab = np.real(shspectrum)
-    im = np.imag(shspectrum)
-    shspectrum = ab * filter + 1j * im * filter
-    # radii, angle = R2P(shspectrum)
-    # radii *= filter
-    # shspectrum = P2R(radii, angle)
-    return shspectrum
-
-def apply_filter_on_abs(shspectrum, filter):
-    radii, angle = R2P(shspectrum)
-    radii *= filter
-    shspectrum = P2R(radii, angle)
-    return shspectrum
-
-
-def power_filter(shape, e, dist=None):
-    # if dist is None:
-    #     dist = construct_filter_dist(shape)
-    output = np.power(dist, e)
-    return output
-
-def lopass_filter(shape, radius, dist=None):
-    # if dist is None:
-    #     dist = construct_filter_dist(shape)
-    output = dist < radius
-    return output
-
-def hipass_filter(shape, radius, dist=None):
-    # if dist is None:
-    #     dist = construct_filter_dist(shape)
-    output = dist > radius
-    return output
-
-# TODO voxelsize dependency
-def construct_filter_dist(shape, voxelsize=None):
-    voxelsize = np.asarray(voxelsize, dtype=np.float)
-    if voxelsize is None:
-        voxelsize = np.ones(len(shape))
-
-
-    center = (np.asarray(shape)/voxelsize - 1) / 2.0
-
-
-    xi = []
-    for i in range(len(shape)):
-        xi.append(range(shape[i])/voxelsize[i])
-    yi = np.meshgrid(*xi, indexing='ij')
-
-    dist = np.zeros(shape)
-    for i in range(len(shape)):
-        dist += (yi[i] - center[i])**2
-    dist = dist**0.5
-    return dist
-
-def P2R(radii, angles):
-    return radii * np.exp(1j*angles)
-
-def R2P(x):
-    return np.abs(x), np.angle(x)
