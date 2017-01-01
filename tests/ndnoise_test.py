@@ -9,7 +9,7 @@ import ndnoise
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-        noise, filter, spectrum = ndnoise.generate([100, 100], return_spectrum=True)
+        noise, filter, spectrum = ndnoise.noisef([100, 100], return_spectrum=True)
 
 
         ndnoise.show(noise, filter, spectrum)
@@ -66,7 +66,7 @@ class MyTestCase(unittest.TestCase):
         lena = scipy.misc.ascent()
         spectrum = np.fft.fftn(lena)
 
-        noise = ndnoise.generate(
+        noise = ndnoise.noisef(
             [100,102,103],
             random_generator_seed=5,
             lambda_start=0,

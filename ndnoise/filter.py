@@ -89,23 +89,22 @@ def hipass_fft_mask(shape, radius, dist=None):
     return output
 
 # TODO voxelsize dependency
-def construct_filter_dist(shape, voxelsize=None):
-    voxelsize = np.asarray(voxelsize, dtype=np.float)
+def dist_from_center(shape, voxelsize=None):
     if voxelsize is None:
         voxelsize = np.ones(len(shape))
+    voxelsize = np.asarray(voxelsize, dtype=np.float)
 
-
-    center = (np.asarray(shape)/voxelsize - 1) / 2.0
+    center = (np.asarray(shape) - 1) / 2.0
 
 
     xi = []
     for i in range(len(shape)):
-        xi.append(range(shape[i])/voxelsize[i])
+        xi.append(range(shape[i]))
     yi = np.meshgrid(*xi, indexing='ij')
 
     dist = np.zeros(shape)
     for i in range(len(shape)):
-        dist += (yi[i] - center[i])**2
+        dist += ((yi[i] - center[i]) * voxelsize[i])**2
     dist = dist**0.5
     return dist
 

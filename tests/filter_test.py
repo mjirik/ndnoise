@@ -71,5 +71,22 @@ class MyTestCase(unittest.TestCase):
         #
         # plt.show()
 
+    def test_dist(self):
+        import ndnoise
+        dst = ndnoise.filter.dist_from_center([5, 5])
+        self.assertAlmostEqual(dst[0][0], 2 * np.sqrt(2))
+
+    def test_dist_with_defined_voxelsize(self):
+        import ndnoise
+        dst = ndnoise.filter.dist_from_center([5, 5], [2.0, 2.0])
+        self.assertAlmostEqual(dst[2][2], 0)
+        self.assertAlmostEqual(dst[0][0], 4 * np.sqrt(2))
+
+    def test_dist_with_defined_voxelsize_3d(self):
+        import ndnoise
+        dst = ndnoise.filter.dist_from_center([5, 5, 5], [1.0, 2.0, 3.0])
+        self.assertAlmostEqual(dst[2][2][2], 0)
+        self.assertAlmostEqual(dst[0][0][0], np.sqrt(2**2 + 4**2 + 6**2))
+
 if __name__ == '__main__':
     unittest.main()

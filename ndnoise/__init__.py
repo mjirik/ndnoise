@@ -1,1 +1,1 @@
-from generator import generate, show
+from generator import noisef, show

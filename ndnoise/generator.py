@@ -8,7 +8,20 @@ logger = logging.getLogger(__name__)
 import numpy as np
 import filter
 
-def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed=None, exponent=0, lambda_start=0, lambda_range=-1):
+
+def noises(shape, voxelsize=None, exponent=0, lambda_start=0, lambda_range=1):
+    """
+    generate noise based on space properties
+    :return:
+    """
+    if voxelsize is None:
+        voxelsize = np.ones([1, len(shape)])
+
+    freq_start = 1.0/lambda_start
+    freq_range = 1.0/lambda_range
+
+
+def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -21,18 +34,16 @@ def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed
     For other parameters see process_specturum_seed().
     :return:
     """
-    if voxelsize is None:
-        voxelsize = np.ones([1, len(shape)])
+    if fs is None:
+        fs = np.ones([1, len(shape)])
 
-    freq_start = 1.0/lambda_start
-    freq_range = 1.0/lambda_range
 
     if random_generator_seed is not None:
         np.random.seed(seed=random_generator_seed)
     spectrum = generate_spectrum_seed(shape)
     signal, filter, spectrum = process_spectrum_seed(
         spectrum,
-        voxelsize=voxelsize,
+        fs=fs,
         exponent=exponent,
         freq_start=freq_start,
         freq_range=freq_range
@@ -43,7 +54,7 @@ def generate(shape, voxelsize=None, return_spectrum=False, random_generator_seed
     return signal
 
 
-def process_spectrum_seed(spectrum, voxelsize=None, exponent=0, freq_start=0, freq_range=None):
+def process_spectrum_seed(spectrum, fs=None, exponent=0, freq_start=0, freq_range=None):
     """
     Filter spectrum based on frequency
     :param spectrum:
@@ -55,8 +66,10 @@ def process_spectrum_seed(spectrum, voxelsize=None, exponent=0, freq_start=0, fr
     if freq_range< 0:
         freq_range = None
 
-    if voxelsize is None:
-        voxelsize = np.ones([1, len(spectrum.shape)])
+    if fs is None:
+        fs = np.ones([1, len(spectrum.shape)])
+
+    voxelsize = 1.0 / np.asarray(fs)
 
     dist = filter.construct_filter_dist(spectrum.shape, voxelsize=voxelsize)
 
