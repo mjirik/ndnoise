@@ -89,10 +89,10 @@ def hipass_fft_mask(shape, radius, dist=None):
     return output
 
 # TODO voxelsize dependency
-def dist_from_center(shape, voxelsize=None):
-    if voxelsize is None:
-        voxelsize = np.ones(len(shape))
-    voxelsize = np.asarray(voxelsize, dtype=np.float)
+def dist_from_center(shape, axis_size=None):
+    if axis_size is None:
+        axis_size = np.ones(len(shape))
+    axis_size = np.asarray(axis_size, dtype=np.float)
 
     center = (np.asarray(shape) - 1) / 2.0
 
@@ -104,9 +104,10 @@ def dist_from_center(shape, voxelsize=None):
 
     dist = np.zeros(shape)
     for i in range(len(shape)):
-        dist += ((yi[i] - center[i]) * voxelsize[i])**2
+        dist += ((yi[i] - center[i]) * axis_size[i]) ** 2
     dist = dist**0.5
     return dist
+
 
 def P2R(radii, angles):
     return radii * np.exp(1j*angles)

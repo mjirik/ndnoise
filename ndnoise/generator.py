@@ -6,7 +6,7 @@ author: Miroslav Jirik
 import logging
 logger = logging.getLogger(__name__)
 import numpy as np
-import filter
+import filtration
 
 
 def noises(shape, voxelsize=None, exponent=0, lambda_start=0, lambda_range=1):
@@ -21,7 +21,7 @@ def noises(shape, voxelsize=None, exponent=0, lambda_start=0, lambda_range=1):
     freq_range = 1.0/lambda_range
 
 
-def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1):
+def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1, spectrum=None):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -35,13 +35,17 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
     :return:
     """
     if fs is None:
-        fs = np.ones([1, len(shape)])
+        fs = np.ones(len(shape))
+        #fs = np.ones([1, len(shape)])
 
 
     if random_generator_seed is not None:
         np.random.seed(seed=random_generator_seed)
-    spectrum = generate_spectrum_seed(shape)
-    signal, filter, spectrum = process_spectrum_seed(
+
+    if spectrum is None:
+        spectrum = generate_spectrum_seed(shape)
+
+    signal, filter, spectrum = spectrum_filtration(
         spectrum,
         fs=fs,
         exponent=exponent,
@@ -54,7 +58,7 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
     return signal
 
 
-def process_spectrum_seed(spectrum, fs=None, exponent=0, freq_start=0, freq_range=None):
+def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=None):
     """
     Filter spectrum based on frequency
     :param spectrum:
@@ -67,20 +71,20 @@ def process_spectrum_seed(spectrum, fs=None, exponent=0, freq_start=0, freq_rang
         freq_range = None
 
     if fs is None:
-        fs = np.ones([1, len(spectrum.shape)])
+        fs = np.ones(len(spectrum.shape))
 
     voxelsize = 1.0 / np.asarray(fs)
 
-    dist = filter.construct_filter_dist(spectrum.shape, voxelsize=voxelsize)
+    dist = filtration.dist_from_center(spectrum.shape, axis_size=voxelsize)
 
     shspectrum = np.fft.fftshift(spectrum)
-    pfilter = filter.power_filter(shspectrum.shape, exponent)
-    shspectrum = filter.apply_filter(shspectrum, pfilter)
+    pfilter = filtration.power_filter(shspectrum.shape, exponent, dist=dist)
+    shspectrum = filtration.apply_filter(shspectrum, pfilter)
 
-    filter = filter.hipass_filter(spectrum.shape, freq_start, dist=dist)
+    filt = filtration.hipass_fft_mask(spectrum.shape, freq_start, dist=dist)
     if freq_range is not None:
-        filter *= filter.lopass_filter(spectrum.shape, freq_start + freq_range, dist=dist)
-    shspectrum *= filter
+        filt *= filtration.lopass_fft_mask(spectrum.shape, freq_start + freq_range, dist=dist)
+    shspectrum *= filt
     spectrum = np.fft.ifftshift(shspectrum)
 
     signal = np.real(np.fft.ifftn(spectrum))

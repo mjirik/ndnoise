@@ -29,7 +29,7 @@ class MyTestCase(unittest.TestCase):
 
         spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.generator.process_spectrum_seed(
+        out = ndnoise.generator.spectrum_filtration(
             spectrum,
             voxelsize=[1, 2],
             freq_start=0,
@@ -48,7 +48,7 @@ class MyTestCase(unittest.TestCase):
 
         spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.generator.process_spectrum_seed(
+        out = ndnoise.generator.spectrum_filtration(
             spectrum,
             freq_start=0,
             freq_range=10,
