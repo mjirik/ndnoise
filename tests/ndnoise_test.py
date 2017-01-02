@@ -12,14 +12,14 @@ class MyTestCase(unittest.TestCase):
         noise, filter, spectrum = ndnoise.noisef([100, 100], return_spectrum=True)
 
 
-        ndnoise.show(noise, filter, spectrum)
+        # ndnoise.show(noise, filter, spectrum)
         # self.assertEqual(True, False)
 
     def test_butter(self):
         b, a = scipy.signal.butter(4, [0, 10000], btype='band', analog=True)
         w, h = scipy.signal.freqs(b, a)
-        plt.plot(w, abs(h))
-        plt.show()
+        # plt.plot(w, abs(h))
+        # plt.show()
 
 
     def test_voxelsize(self):
@@ -29,16 +29,16 @@ class MyTestCase(unittest.TestCase):
 
         spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.generator.spectrum_filtration(
+        out = ndnoise.filtration.spectrum_filtration(
             spectrum,
-            voxelsize=[1, 2],
+            fs=[0.1, 0.5],
             freq_start=0,
             freq_range=10,
             exponent=-1.5
         )
         signal, filter, spectrum = out
 
-        ndnoise.show(signal, filter, spectrum, log_view=True)
+        # ndnoise.show(signal, filter, spectrum, log_view=True)
 
 
     def test_lena_filter(self):
@@ -48,7 +48,7 @@ class MyTestCase(unittest.TestCase):
 
         spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.generator.spectrum_filtration(
+        out = ndnoise.filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
             freq_range=10,
@@ -56,7 +56,7 @@ class MyTestCase(unittest.TestCase):
         )
         signal, filter, spectrum = out
 
-        ndnoise.show(signal, filter, spectrum, log_view=True)
+        # ndnoise.show(signal, filter, spectrum, log_view=True)
         # self.assertEqual(True, False)
 
     # lambda_mm = shape_px*(1/freq_px)*voxelsize_mm
@@ -69,12 +69,12 @@ class MyTestCase(unittest.TestCase):
         noise = ndnoise.noisef(
             [100,102,103],
             random_generator_seed=5,
-            lambda_start=0,
-            lambda_range=1/10.0,
+            freq_start=0,
+            freq_range=1/10.0,
             exponent=-1.5
         )
 
-        plt.imshow(noise[5,:,:])
+        # plt.imshow(noise[5,:,:])
         # plt.show()
 
         # self.assertEqual(True, False)

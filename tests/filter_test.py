@@ -28,7 +28,7 @@ class MyTestCase(unittest.TestCase):
         for order in [3, 6, 9]:
             b, a = ndnoise.filtration.butter_bandpass(lowcut, highcut, fs, order=order)
             w, h = freqz(b, a, worN=2000)
-            plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
+            # plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
 
 
         # Filter a noisy signal.
@@ -110,14 +110,14 @@ class MyTestCase(unittest.TestCase):
 
         signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
         # import matplotlib.pyplot as plt
-        plt.figure()
-        plt.subplot(131)
-        plt.imshow(signal, cmap="gray")
-        plt.subplot(132)
-        plt.imshow(np.abs(shspectrum), cmap="gray")
-        plt.subplot(133)
-        plt.imshow(np.abs(spectrum_ret), cmap="gray")
-        plt.show()
+        # plt.figure()
+        # plt.subplot(131)
+        # plt.imshow(signal, cmap="gray")
+        # plt.subplot(132)
+        # plt.imshow(np.abs(shspectrum), cmap="gray")
+        # plt.subplot(133)
+        # plt.imshow(np.abs(spectrum_ret), cmap="gray")
+        # plt.show()
 
         # a = signal[[:]]
         suda = signal[:, ::2]
@@ -148,14 +148,14 @@ class MyTestCase(unittest.TestCase):
 
         signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
         # import matplotlib.pyplot as plt
-        plt.figure()
-        plt.subplot(131)
-        plt.imshow(signal, cmap="gray")
-        plt.subplot(132)
-        plt.imshow(np.abs(shspectrum), cmap="gray")
-        plt.subplot(133)
-        plt.imshow(np.abs(spectrum_ret), cmap="gray")
-        plt.show()
+        # plt.figure()
+        # plt.subplot(131)
+        # plt.imshow(signal, cmap="gray")
+        # plt.subplot(132)
+        # plt.imshow(np.abs(shspectrum), cmap="gray")
+        # plt.subplot(133)
+        # plt.imshow(np.abs(spectrum_ret), cmap="gray")
+        # plt.show()
 
         # a = signal[[:]]
         suda = signal[::2, :]
