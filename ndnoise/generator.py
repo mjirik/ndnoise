@@ -45,7 +45,7 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
     if spectrum is None:
         spectrum = generate_spectrum_seed(shape)
 
-    signal, filter, spectrum = spectrum_filtration(
+    signal, filter, spectrum = filtration.spectrum_filtration(
         spectrum,
         fs=fs,
         exponent=exponent,
@@ -58,37 +58,6 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
     return signal
 
 
-def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=None):
-    """
-    Filter spectrum based on frequency
-    :param spectrum:
-    :param exponent:
-    :param freq_start:
-    :param freq_range:
-    :return:
-    """
-    if freq_range< 0:
-        freq_range = None
-
-    if fs is None:
-        fs = np.ones(len(spectrum.shape))
-
-    voxelsize = 1.0 / np.asarray(fs)
-
-    dist = filtration.dist_from_center(spectrum.shape, axis_size=voxelsize)
-
-    shspectrum = np.fft.fftshift(spectrum)
-    pfilter = filtration.power_filter(shspectrum.shape, exponent, dist=dist)
-    shspectrum = filtration.apply_filter(shspectrum, pfilter)
-
-    filt = filtration.hipass_fft_mask(spectrum.shape, freq_start, dist=dist)
-    if freq_range is not None:
-        filt *= filtration.lopass_fft_mask(spectrum.shape, freq_start + freq_range, dist=dist)
-    shspectrum *= filt
-    spectrum = np.fft.ifftshift(shspectrum)
-
-    signal = np.real(np.fft.ifftn(spectrum))
-    return signal, filter, spectrum
 
 
 def generate_spectrum_seed(shape, seed=None):

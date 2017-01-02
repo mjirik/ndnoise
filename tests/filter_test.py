@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+
+import logging
+logger = logging.getLogger(__name__)
+
 import unittest
 from scipy.signal import butter, lfilter, freqz
 import matplotlib.pyplot as plt
@@ -89,16 +94,115 @@ class MyTestCase(unittest.TestCase):
         self.assertAlmostEqual(dst[2][2][2], 0)
         self.assertAlmostEqual(dst[0][0][0], np.sqrt(2**2 + 4**2 + 6**2))
 
-    def test_freq_spectrum_processing(self):
-        shape = [25, 25]
-        spectrum = np.zeros(shape=shape)
-        spectrum[11, :] = 1
-        spectrum = np.fft.ifftshift(spectrum)
+    def test_max_x_freq_spectrum_processing(self):
+        """
+        Test of maximal frequence
+        :return:
+        """
+        shape = [24, 24]
+        center = (np.asarray(shape) / 2)
 
-        signal = ndnoise.generator.noisef(shape, spectrum=spectrum)
+        shspectrum = np.zeros(shape=shape, dtype=np.complex)
+        shspectrum[center[0], 0] = 1
+        # shspectrum[center[0], 24] = 0
+        shspectrum[center[0], center[1]] = 2
+        spectrum = np.fft.ifftshift(shspectrum)
+
+        signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
         # import matplotlib.pyplot as plt
+        plt.figure()
+        plt.subplot(131)
         plt.imshow(signal, cmap="gray")
+        plt.subplot(132)
+        plt.imshow(np.abs(shspectrum), cmap="gray")
+        plt.subplot(133)
+        plt.imshow(np.abs(spectrum_ret), cmap="gray")
         plt.show()
+
+        # a = signal[[:]]
+        suda = signal[:, ::2]
+        licha = signal[:, 1::2]
+
+        var0 = np.var(signal)
+        vars = np.var(suda)
+        varl = np.var(licha)
+
+        self.assertGreater(var0, 2.5 * vars)
+        self.assertGreater(var0, 2.5 * varl)
+
+
+    def test_max_y_freq_spectrum_processing(self):
+        """
+        Test of maximal frequence
+        :return:
+        """
+        shape = [20, 20]
+        # center = np.round((np.asarray(shape) / 2.0))
+        center = (np.asarray(shape) / 2)
+
+        shspectrum = np.zeros(shape=shape, dtype=np.complex)
+        shspectrum[0, center[1]] = 1
+        # shspectrum[center[0], 24] = 0
+        shspectrum[center[0], center[1]] = 2
+        spectrum = np.fft.ifftshift(shspectrum)
+
+        signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
+        # import matplotlib.pyplot as plt
+        plt.figure()
+        plt.subplot(131)
+        plt.imshow(signal, cmap="gray")
+        plt.subplot(132)
+        plt.imshow(np.abs(shspectrum), cmap="gray")
+        plt.subplot(133)
+        plt.imshow(np.abs(spectrum_ret), cmap="gray")
+        plt.show()
+
+        # a = signal[[:]]
+        suda = signal[::2, :]
+        licha = signal[1::2, :]
+
+        var0 = np.var(signal)
+        vars = np.var(suda)
+        varl = np.var(licha)
+
+        self.assertGreater(var0, 2.5 * vars)
+        self.assertGreater(var0, 2.5 * varl)
+
+    def test_compare_fftfreq(self):
+        """
+        Test few setups
+        :return:
+        """
+        import itertools
+        sampling_rates = [10, 15, 2.1, 0.01]
+        ns = [4, 9, 5, 6]
+        for params in itertools.product(sampling_rates, ns):
+            sampling_rate, n = params
+            freq1 = np.fft.fftfreq(n, d=1./sampling_rate)
+            freq2 = ndnoise.filtration.fftfreq([n], [1. / sampling_rate])
+            logger.debug("freq1 " + str(freq1))
+            logger.debug("freq2 " + str(freq2))
+
+            self.assertAlmostEqual(0.0, np.sum((np.abs(freq1) - freq2)**2), msg="parameters " + str(params))
+
+    def test_2d_fftfreq(self):
+        import itertools
+        spacings = [[10, 1.0], [0.12, 5.0], None, 3]
+        shapes = [[10, 11], [9, 11], [8, 10], [15, 2]]
+        for params in itertools.product(spacings, shapes):
+            spacing, shape = params
+            freq = ndnoise.filtration.fftfreq(shape, spacing=spacing)
+            logger.debug("freq " + str(freq))
+
+    def test_nd_fftfreq(self):
+        import itertools
+        spacings = [None, 5, 1.2]
+        shapes = [[2], 3, [10, 11], [9, 11, 15], [8, 10, 5, 2], [15, 2, 3, 2, 5]]
+        for params in itertools.product(spacings, shapes):
+            spacing, shape = params
+            freq = ndnoise.filtration.fftfreq(shape, spacing=spacing)
+            logger.debug("freq " + str(freq))
+
 
 if __name__ == '__main__':
     unittest.main()
