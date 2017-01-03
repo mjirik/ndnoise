@@ -9,19 +9,30 @@ import numpy as np
 import filtration
 
 
-def noises(shape, voxelsize=None, exponent=0, lambda_start=0, lambda_range=1):
+def noises(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_range=1, **kwargs):
     """
     generate noise based on space properties
     :return:
     """
-    if voxelsize is None:
-        voxelsize = np.ones([1, len(shape)])
+    if sample_spacing is None:
+        sample_spacing = np.ones([1, len(shape)])
 
-    freq_start = 1.0/lambda_start
-    freq_range = 1.0/lambda_range
+    sample_spacing = np.asarray(sample_spacing)
+    freq_start = 1.0 / lambda_start
+    freq_range = 1.0 / lambda_range
+    sampling_frequency = 1.0 / sample_spacing
+    retval = noisef(
+        shape,
+        sampling_frequency=sampling_frequency,
+        exponent=exponent,
+        freq_start=freq_start,
+        freq_range=freq_range,
+        **kwargs
+    )
+    return retval
 
 
-def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1, spectrum=None):
+def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1, spectrum=None):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -34,8 +45,8 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
     For other parameters see process_specturum_seed().
     :return:
     """
-    if fs is None:
-        fs = np.ones(len(shape))
+    if sampling_frequency is None:
+        sampling_frequency = np.ones(len(shape))
         #fs = np.ones([1, len(shape)])
 
 
@@ -47,7 +58,7 @@ def noisef(shape, fs=None, return_spectrum=False, random_generator_seed=None, ex
 
     signal, filter, spectrum = filtration.spectrum_filtration(
         spectrum,
-        fs=fs,
+        fs=sampling_frequency,
         exponent=exponent,
         freq_start=freq_start,
         freq_range=freq_range

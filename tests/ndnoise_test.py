@@ -66,18 +66,44 @@ class MyTestCase(unittest.TestCase):
         lena = scipy.misc.ascent()
         spectrum = np.fft.fftn(lena)
 
-        noise = ndnoise.noisef(
+        noise, filt, spectrum = ndnoise.noisef(
             [100,102,103],
             random_generator_seed=5,
             freq_start=0,
             freq_range=1/10.0,
-            exponent=-1.5
+            exponent=-1.5,
+            return_spectrum=True
         )
-
-        # plt.imshow(noise[5,:,:])
-        # plt.show()
+        plt.subplot(131)
+        plt.imshow(noise[5,:,:])
+        plt.colorbar()
+        plt.subplot(132)
+        # plt.imshow(np.abs(filt[5,:,:]))
+        plt.colorbar()
+        plt.subplot(133)
+        plt.imshow(np.abs(spectrum[5,:,:]))
+        plt.colorbar()
+        plt.show()
 
         # self.assertEqual(True, False)
+
+    def test_3d_noises(self):
+        import scipy.misc
+        lena = scipy.misc.ascent()
+        spectrum = np.fft.fftn(lena)
+
+        noise = ndnoise.generator.noises(
+            [100,102,103],
+            sample_spacing=[1,1,1],
+            random_generator_seed=5,
+            lambda_start=4,
+            lambda_range=10,
+            exponent=1.0
+        )
+
+        plt.imshow(noise[5,:,:])
+        plt.show()
+
 
 if __name__ == '__main__':
     unittest.main()

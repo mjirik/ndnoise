@@ -174,6 +174,7 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=
     voxelsize = 1.0 / np.asarray(fs)
 
     dist = dist_from_center(spectrum.shape, axis_size=voxelsize)
+    dist = fftfreq(spectrum.shape, spacing=voxelsize)
 
     shspectrum = np.fft.fftshift(spectrum)
     pfilter = power_filter(shspectrum.shape, exponent, dist=dist)
