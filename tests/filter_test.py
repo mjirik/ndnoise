@@ -204,5 +204,25 @@ class MyTestCase(unittest.TestCase):
             logger.debug("freq " + str(freq))
 
 
+    def test_R2P(self):
+        x = [10 + 10 * 1j , 1 + 0 * 1j, 0 + 1j]
+        expected_absolute = [10 * 2**0.5, 1.0, 1.0]
+        expected_angle = [0.25 * np.pi, 0.0, 0.5 * np.pi]
+        absolute, angle = ndnoise.filtration.R2P(x)
+
+        for eab, ean, ab, an in zip(expected_absolute, expected_angle, absolute, angle):
+            self.assertAlmostEquals(eab, ab)
+            self.assertAlmostEquals(ean, an)
+
+
+    def test_P2R(self):
+        expected_x = [10 + 10 * 1j , 1 + 0 * 1j, 0 + 1j]
+        absolute = [10 * 2**0.5, 1.0, 1.0]
+        angle = [0.25 * np.pi, 0.0, 0.5 * np.pi]
+        x = ndnoise.filtration.P2R(absolute, angle)
+
+        for xi, exi in zip(x, expected_x):
+            self.assertAlmostEquals(xi, exi)
+
 if __name__ == '__main__':
     unittest.main()

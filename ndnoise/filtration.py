@@ -149,6 +149,8 @@ def fftfreq(shape, spacing=None):
 
 
 def P2R(radii, angles):
+    radii = np.asarray(radii)
+    angles = np.asarray(angles)
     return radii * np.exp(1j*angles)
 
 def R2P(x):
