@@ -64,13 +64,6 @@ def apply_filter(shspectrum, filter):
     # shspectrum = P2R(radii, angle)
     return shspectrum
 
-def apply_filter_on_abs(shspectrum, filter):
-    radii, angle = R2P(shspectrum)
-    radii *= filter
-    shspectrum = P2R(radii, angle)
-    return shspectrum
-
-
 def power_filter(shape, e, dist=None):
     # if dist is None:
     #     dist = construct_filter_dist(shape)
