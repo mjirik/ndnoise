@@ -9,7 +9,7 @@ import ndnoise
 
 class MyTestCase(unittest.TestCase):
     def test_something(self):
-        noise, filter, spectrum = ndnoise.noisef([100, 100], return_spectrum=True)
+        noise, filter, spectrum, freqs = ndnoise.noisef([100, 100], return_spectrum=True)
 
 
         # ndnoise.show(noise, filter, spectrum)
