@@ -56,7 +56,7 @@ def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generat
     if spectrum is None:
         spectrum = generate_spectrum_seed(shape)
 
-    signal, filter, spectrum = filtration.spectrum_filtration(
+    signal, filter, spectrum, freqs = filtration.spectrum_filtration(
         spectrum,
         fs=sampling_frequency,
         exponent=exponent,
@@ -65,7 +65,7 @@ def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generat
     )
 
     if return_spectrum:
-        return signal, filter, spectrum
+        return signal, filter, spectrum, freqs
     return signal
 
 

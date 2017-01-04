@@ -108,7 +108,7 @@ class MyTestCase(unittest.TestCase):
         shspectrum[center[0], center[1]] = 2
         spectrum = np.fft.ifftshift(shspectrum)
 
-        signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
+        signal, filt, spectrum_ret, freqs = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
         # import matplotlib.pyplot as plt
         # plt.figure()
         # plt.subplot(131)
@@ -146,7 +146,7 @@ class MyTestCase(unittest.TestCase):
         shspectrum[center[0], center[1]] = 2
         spectrum = np.fft.ifftshift(shspectrum)
 
-        signal, filt, spectrum_ret = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
+        signal, filt, spectrum_ret, freqs = ndnoise.generator.noisef(shape, spectrum=spectrum, return_spectrum=True)
         # import matplotlib.pyplot as plt
         # plt.figure()
         # plt.subplot(131)
