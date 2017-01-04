@@ -36,7 +36,7 @@ class MyTestCase(unittest.TestCase):
             freq_range=10,
             exponent=-1.5
         )
-        signal, filter, spectrum = out
+        signal, filter, spectrum, freqs = out
 
         # ndnoise.show(signal, filter, spectrum, log_view=True)
 
@@ -54,7 +54,7 @@ class MyTestCase(unittest.TestCase):
             freq_range=10,
             exponent=-1.5
         )
-        signal, filter, spectrum = out
+        signal, filter, spectrum, freqs = out
 
         # ndnoise.show(signal, filter, spectrum, log_view=True)
         # self.assertEqual(True, False)
