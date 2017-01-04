@@ -176,15 +176,15 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=
     # dist = dist_from_center(spectrum.shape, axis_size=voxelsize)
     freqs = fftfreq(spectrum.shape, spacing=voxelsize)
 
-    shspectrum = np.fft.fftshift(spectrum)
-    pfilter = power_filter(shspectrum.shape, exponent, dist=freqs)
-    shspectrum = apply_filter(shspectrum, pfilter)
+    # shspectrum = np.fft.fftshift(spectrum)
+    pfilter = power_filter(spectrum.shape, exponent, dist=freqs)
+    spectrum = apply_filter(spectrum, pfilter)
 
     filt = hipass_fft_mask(spectrum.shape, freq_start, dist=freqs)
     if freq_range is not None:
         filt *= lopass_fft_mask(spectrum.shape, freq_start + freq_range, dist=freqs)
-    shspectrum *= filt
-    spectrum = np.fft.ifftshift(shspectrum)
+    spectrum *= filt
+    # spectrum = np.fft.ifftshift(shspectrum)
 
     signal = np.real(np.fft.ifftn(spectrum))
     return signal, filt, spectrum, freqs
