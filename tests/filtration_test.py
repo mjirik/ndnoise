@@ -224,5 +224,25 @@ class MyTestCase(unittest.TestCase):
         for xi, exi in zip(x, expected_x):
             self.assertAlmostEquals(xi, exi)
 
+
+    def test_lena_filter(self):
+        import scipy.misc
+        lena = scipy.misc.ascent()
+        spectrum = np.fft.fftn(lena)
+
+        # spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
+
+        out = ndnoise.filtration.spectrum_filtration(
+            spectrum,
+            freq_start=0,
+            freq_range=10,
+            exponent=-0
+        )
+        signal, filter, spectrum, freqs = out
+
+        ndnoise.show(signal, filter, spectrum, log_view=True)
+        plt.show()
+        # self.assertEqual(True, False)
+
 if __name__ == '__main__':
     unittest.main()

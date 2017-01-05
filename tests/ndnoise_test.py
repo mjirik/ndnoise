@@ -17,9 +17,9 @@ class MyTestCase(unittest.TestCase):
 
     def test_butter(self):
         b, a = scipy.signal.butter(4, [0, 10000], btype='band', analog=True)
-        w, h = scipy.signal.freqs(b, a)
-        # plt.plot(w, abs(h))
-        # plt.show()
+        w, h = scipy.signal.freqs(b, a, worN=range(1000, 2000))
+        plt.plot(w, abs(h))
+        plt.show()
 
 
     def test_voxelsize(self):
@@ -39,25 +39,6 @@ class MyTestCase(unittest.TestCase):
         signal, filter, spectrum, freqs = out
 
         # ndnoise.show(signal, filter, spectrum, log_view=True)
-
-
-    def test_lena_filter(self):
-        import scipy.misc
-        lena = scipy.misc.ascent()
-        spectrum = np.fft.fftn(lena)
-
-        spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
-
-        out = ndnoise.filtration.spectrum_filtration(
-            spectrum,
-            freq_start=0,
-            freq_range=10,
-            exponent=-1.5
-        )
-        signal, filter, spectrum, freqs = out
-
-        # ndnoise.show(signal, filter, spectrum, log_view=True)
-        # self.assertEqual(True, False)
 
     # lambda_mm = shape_px*(1/freq_px)*voxelsize_mm
     # lambda_mm * freq_px = shape_px*voxelsize_mm
