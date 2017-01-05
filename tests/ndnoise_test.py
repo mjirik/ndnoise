@@ -74,19 +74,19 @@ class MyTestCase(unittest.TestCase):
             exponent=1.0,
             return_spectrum=True
         )
-        plt.subplot(221)
-        plt.imshow(noise[5,:,:], cmap="gray")
-        plt.colorbar()
-        plt.subplot(222)
-        plt.imshow(np.abs(filt[5,:,:]))
-        plt.colorbar()
-        plt.subplot(223)
-        plt.imshow(np.abs(spectrum[5,:,:]))
-        plt.colorbar()
-        plt.subplot(224)
-        plt.imshow(freqs[5,:,:])
-        plt.colorbar()
-        plt.show()
+        # plt.subplot(221)
+        # plt.imshow(noise[5,:,:], cmap="gray")
+        # plt.colorbar()
+        # plt.subplot(222)
+        # plt.imshow(np.abs(filt[5,:,:]))
+        # plt.colorbar()
+        # plt.subplot(223)
+        # plt.imshow(np.abs(spectrum[5,:,:]))
+        # plt.colorbar()
+        # plt.subplot(224)
+        # plt.imshow(freqs[5,:,:])
+        # plt.colorbar()
+        # plt.show()
 
         # self.assertEqual(True, False)
 
@@ -104,8 +104,8 @@ class MyTestCase(unittest.TestCase):
             exponent=0.0
         )
 
-        plt.imshow(noise[5,:,:], cmap="gray")
-        plt.show()
+        # plt.imshow(noise[5,:,:], cmap="gray")
+        # plt.show()
 
 
 if __name__ == '__main__':
