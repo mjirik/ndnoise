@@ -236,12 +236,12 @@ class MyTestCase(unittest.TestCase):
             spectrum,
             freq_start=0,
             freq_range=0.1,
-            exponent=-0
+            exponent=0.1
         )
         signal, filter, spectrum, freqs = out
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
-        # plt.show()
+        plt.show()
         # self.assertEqual(True, False)
 
     def test_lena_filter_butter(self):
@@ -255,12 +255,31 @@ class MyTestCase(unittest.TestCase):
             spectrum,
             freq_start=0,
             freq_range=0.1,
-            exponent=-0,
+            exponent=-0.1,
             filter_type="butter"
         )
         signal, filter, spectrum, freqs = out
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
+
+    def test_2d_butter(self):
+        import scipy
+        import scipy.signal
+
+        fs = 100.0
+        lowcut = 0
+        highcut = 10
+        order = 2
+
+        worN = np.asarray([[0, 5 , 10], [1, 5, 9], [1, 4, 10]])
+        nyq = 0.5 * fs
+        low = lowcut / nyq
+        high = highcut / nyq
+        b, a = scipy.signal.butter(order, [low, high], btype='band')
+        w, h = response = scipy.signal.freqs(a, b, worN=worN)
+        plt.plot(w, abs(h))
+        # plt.show()
+        # y = scipy.signal.lfilter(b, a, data)
 
 if __name__ == '__main__':
     unittest.main()
