@@ -225,7 +225,7 @@ class MyTestCase(unittest.TestCase):
             self.assertAlmostEquals(xi, exi)
 
 
-    def test_lena_filter(self):
+    def test_lena_filter_ideal(self):
         import scipy.misc
         lena = scipy.misc.ascent()
         spectrum = np.fft.fftn(lena)
@@ -235,14 +235,32 @@ class MyTestCase(unittest.TestCase):
         out = ndnoise.filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
-            freq_range=10,
+            freq_range=0.1,
             exponent=-0
         )
         signal, filter, spectrum, freqs = out
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
-        plt.show()
+        # plt.show()
         # self.assertEqual(True, False)
+
+    def test_lena_filter_butter(self):
+        import scipy.misc
+        lena = scipy.misc.ascent()
+        spectrum = np.fft.fftn(lena)
+
+        # spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
+
+        out = ndnoise.filtration.spectrum_filtration(
+            spectrum,
+            freq_start=0,
+            freq_range=0.1,
+            exponent=-0,
+            filter_type="butter"
+        )
+        signal, filter, spectrum, freqs = out
+
+        ndnoise.show(signal, filter, spectrum, log_view=True)
 
 if __name__ == '__main__':
     unittest.main()
