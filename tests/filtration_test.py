@@ -262,6 +262,7 @@ class MyTestCase(unittest.TestCase):
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
 
+    @unittest.skip("incomplete")
     def test_2d_butter(self):
         import scipy
         import scipy.signal
