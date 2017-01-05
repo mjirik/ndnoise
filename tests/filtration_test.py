@@ -7,7 +7,7 @@ import unittest
 from scipy.signal import butter, lfilter, freqz
 import matplotlib.pyplot as plt
 import numpy as np
-import ndnoise.filtration
+from ndnoise import filtration
 import ndnoise.generator
 
 
@@ -26,7 +26,7 @@ class MyTestCase(unittest.TestCase):
         plt.figure(1)
         plt.clf()
         for order in [3, 6, 9]:
-            b, a = ndnoise.filtration.butter_bandpass(lowcut, highcut, fs, order=order)
+            b, a = filtration.butter_bandpass(lowcut, highcut, fs, order=order)
             w, h = freqz(b, a, worN=2000)
             # plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
 
@@ -44,8 +44,8 @@ class MyTestCase(unittest.TestCase):
         x += a * np.cos(2 * np.pi * f0 * t + .11)
         x += 0.03 * np.cos(2 * np.pi * 2000 * t)
 
-        y1 = ndnoise.filtration.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
-        y2 = ndnoise.filtration.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
+        y1 = filtration.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
+        y2 = filtration.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
 
         energy_ys = np.sum(ys**2)
         energy_error_y1 = np.sum((ys - y1)**2)
@@ -79,12 +79,12 @@ class MyTestCase(unittest.TestCase):
 
     def test_dist(self):
         import ndnoise
-        dst = ndnoise.filtration.dist_from_center([5, 5])
+        dst = filtration.dist_from_center([5, 5])
         self.assertAlmostEqual(dst[0][0], 2 * np.sqrt(2))
 
     def test_dist_with_defined_voxelsize(self):
         import ndnoise
-        dst = ndnoise.filtration.dist_from_center([5, 5], [2.0, 2.0])
+        dst = filtration.dist_from_center([5, 5], [2.0, 2.0])
         self.assertAlmostEqual(dst[2][2], 0)
         self.assertAlmostEqual(dst[0][0], 4 * np.sqrt(2))
 
@@ -232,7 +232,7 @@ class MyTestCase(unittest.TestCase):
 
         # spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.filtration.spectrum_filtration(
+        out = filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
             freq_range=0.1,
@@ -251,7 +251,7 @@ class MyTestCase(unittest.TestCase):
 
         # spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
 
-        out = ndnoise.filtration.spectrum_filtration(
+        out = filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
             freq_range=0.1,
@@ -266,19 +266,24 @@ class MyTestCase(unittest.TestCase):
         import scipy
         import scipy.signal
 
-        fs = 100.0
-        lowcut = 0
-        highcut = 10
+        # fs = 100.0
+        # lowcut = 0
+        # highcut = 10
+        # nyq = 0.5 * fs
+        # low = lowcut / nyq
+        # high = highcut / nyq
         order = 2
+        low = 10
+        high = 15
+        # TODO why is there problem with frequeny# TODO why is there problem with frequeny??
 
-        worN = np.asarray([[0, 5 , 10], [1, 5, 9], [1, 4, 10]])
-        nyq = 0.5 * fs
-        low = lowcut / nyq
-        high = highcut / nyq
+        # worN = np.asarray([[0, 5 , 10], [1, 5, 9], [1, 4, 10]])
+        worN = filtration.fftfreq([100, 150], [0.01, 0.01])
         b, a = scipy.signal.butter(order, [low, high], btype='band')
         w, h = response = scipy.signal.freqs(a, b, worN=worN)
-        plt.plot(w, abs(h))
-        # plt.show()
+        # plt.plot(w, abs(h))
+        plt.imshow(abs(h))
+        plt.show()
         # y = scipy.signal.lfilter(b, a, data)
 
 if __name__ == '__main__':

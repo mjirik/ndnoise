@@ -21,7 +21,6 @@ class MyTestCase(unittest.TestCase):
         plt.plot(w, abs(h))
         plt.show()
 
-
     def test_voxelsize(self):
         import scipy.misc
         lena = scipy.misc.ascent()
