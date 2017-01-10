@@ -26,7 +26,7 @@ class MyTestCase(unittest.TestCase):
         plt.figure(1)
         plt.clf()
         for order in [3, 6, 9]:
-            b, a = filtration.butter_bandpass(lowcut, highcut, fs, order=order)
+            b, a = filtration.butter_bandpass_1d(lowcut, highcut, fs, order=order)
             w, h = freqz(b, a, worN=2000)
             # plt.plot((fs * 0.5 / np.pi) * w, abs(h), label="order = %d" % order)
 
@@ -44,8 +44,8 @@ class MyTestCase(unittest.TestCase):
         x += a * np.cos(2 * np.pi * f0 * t + .11)
         x += 0.03 * np.cos(2 * np.pi * 2000 * t)
 
-        y1 = filtration.butter_bandpass_filter(x, lowcut, highcut, fs, order=6)
-        y2 = filtration.butter_bandpass_freq_filter(x, lowcut, highcut, fs, order=6)
+        y1 = filtration.butter_bandpass_filter_1d(x, lowcut, highcut, fs, order=6)
+        y2 = filtration.butter_bandpass_freq_filter_1d(x, lowcut, highcut, fs, order=6)
 
         energy_ys = np.sum(ys**2)
         energy_error_y1 = np.sum((ys - y1)**2)
@@ -241,7 +241,7 @@ class MyTestCase(unittest.TestCase):
         signal, filter, spectrum, freqs = out
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
-        plt.show()
+        # plt.show()
         # self.assertEqual(True, False)
 
     def test_lena_filter_butter(self):
@@ -254,13 +254,14 @@ class MyTestCase(unittest.TestCase):
         out = filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
-            freq_range=0.1,
-            exponent=-0.1,
+            freq_range=0.01,
+            exponent=+0.0001,
             filter_type="butter"
         )
         signal, filter, spectrum, freqs = out
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
+        plt.show()
 
     # @unittest.skip("incomplete")
     def test_2d_butter(self):
@@ -281,54 +282,96 @@ class MyTestCase(unittest.TestCase):
 
 
 
-        lowcut = 30
-        highcut = 50
+
+        lowcut = 10
+        highcut = 40
+
+        # this forks for analog filter
         filter_fs = highcut * 2.0
         nyq = 0.5 * filter_fs
-        low = 0.5 * lowcut / nyq
-        high = 0.5 * highcut / nyq
+        low_analog = 0.5 * lowcut / nyq
+        high_analog = 0.5 * highcut / nyq
 
-        # 1.0 * nyq = highcut
-        # nyq = highcut
-        # 0.5 * filterfs = highcut
-
-
-        # nyq = highcut / high
-        # 0.5 * filter_fs = 1.0 / high
-        # filter_fs = 2.0 / high
+        # this works for digital filter
+        filter_fs = highcut * 2.0
+        nyq = 0.5 * filter_fs
+        low_digital = 0.5 * lowcut / (nyq * np.pi)
+        high_digital = 0.5 * highcut / (nyq * np.pi)
         # TODO why is there problem with frequeny# TODO why is there problem with frequeny??
 
         # worN = np.asarray([[0, 5 , 10], [1, 5, 9], [1, 4, 10]])
         worN = filtration.fftfreq(area_size, data_sampling)
-        plt.figure()
-        plt.subplot(321)
+
+        # manual gain computation
+        gain = 1 / np.sqrt(1 + (worN / highcut)**(2.0 * order))
+
+        # construct digital filter
+        b_digital, a_digital = scipy.signal.butter(order, Wn=[low_digital, high_digital], btype='band', analog=False)
+
+        # 1D specturm of digital filter
+        w_digital_1d, h_digital_1d = scipy.signal.freqz(b_digital, a_digital)
+        # 2D spectrum of digital filter
+        w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(worN / filter_fs))
+
+        # construct digital filter
+        b_analog, a_analog = scipy.signal.butter(order, Wn=[low_analog, high_analog], btype='band', analog=True)
+
+        # 1D specturm of digital filter
+        w_analog, h_analog = scipy.signal.freqs(b_analog, a_analog)
+        # 2D spectrum of digital filter
+        w_analog, h_analog = scipy.signal.freqs(b_analog, a_analog, worN=(worN / filter_fs))
+
+        plt.figure(figsize=(20, 10))
+        plt.subplot(331)
         plt.imshow(worN)
         plt.colorbar()
+        plt.title("freqs (filtration.fftfreq)")
 
-        plt.subplot(322)
-        gain = 1 / np.sqrt(1 + (worN / highcut)**(2.0 * order))
+        plt.subplot(332)
+        plt.imshow(w_digital)
+        plt.title("normalized freqs 2D digital")
+        plt.colorbar()
+
+        plt.subplot(333)
+        plt.imshow(w_digital * filter_fs)
+        plt.colorbar()
+        plt.title("un-normalized freqs 2D digital")
+
+
+        plt.subplot(334)
         plt.imshow(abs(gain))
         plt.colorbar()
+        plt.title("gain")
 
 
-        b, a = scipy.signal.butter(order, Wn=[low, high], btype='band', analog=True)
-        w, h = response = scipy.signal.freqs(b, a)
+        # b, a = scipy.signal.butter(order, Wn=[low, high], btype='band', analog=True)
+        # w, h = response = scipy.signal.freqs(b, a)
 
-        plt.subplot(324)
-        plt.plot(w * filter_fs, abs(h))
 
-        w, h = response = scipy.signal.freqs(b, a, worN=(worN / filter_fs))
-        plt.subplot(325)
-        plt.imshow(w)
+
+        # w, h = response = scipy.signal.freqs(b, a, worN=(worN / filter_fs))
+
+
+
+        plt.subplot(335)
+        plt.imshow(abs(h_digital))
         plt.colorbar()
-        plt.subplot(326)
-        plt.imshow(abs(h))
-        plt.colorbar()
+        plt.title("2D digital spectrum")
 
 
-        plt.subplot(323)
-        plt.imshow(w * filter_fs)
+
+        plt.subplot(336)
+        plt.imshow(abs(h_analog))
         plt.colorbar()
+        plt.title("2D analog spectrum")
+
+        plt.subplot(337)
+        plt.plot(w_digital_1d * filter_fs, abs(h_digital_1d))
+        plt.title("1D spectrum")
+        plt.axvline(lowcut, color='r')
+        plt.axvline(highcut, color='r')
+        plt.axhline(1/(2**0.5), color='r')
+
         plt.show()
         # y = scipy.signal.lfilter(b, a, data)
 

@@ -13,7 +13,7 @@ import scipy.signal
 import matplotlib.pyplot as plt
 
 
-def butter_bandpass(lowcut, highcut, fs, order=5):
+def butter_bandpass_1d(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
@@ -21,13 +21,13 @@ def butter_bandpass(lowcut, highcut, fs, order=5):
     return b, a
 
 
-def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+def butter_bandpass_filter_1d(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass_1d(lowcut, highcut, fs, order=order)
     y = scipy.signal.lfilter(b, a, data)
     return y
 
-def butter_bandpass_freq_filter(data, lowcut, highcut, fs, order=5):
-    b, a = butter_bandpass(lowcut, highcut, fs, order=order)
+def butter_bandpass_freq_filter_1d(data, lowcut, highcut, fs, order=5):
+    b, a = butter_bandpass_1d(lowcut, highcut, fs, order=order)
     dataf = np.fft.fft(data)
     # w, h = freqz(b, a, worN=len(dataf), whole=True)
     w, h = scipy.signal.freqz(b, a, worN=len(dataf), whole=True)
@@ -70,29 +70,42 @@ def power_filter(shape, e, dist=None):
     output = np.power(dist, e)
     return output
 
-def lopass_ideal_fft_mask(shape, radius, dist=None):
+def lopass_ideal_fft_mask(shape, radius, freqs=None, **kwargs):
     # if dist is None:
     #     dist = construct_filter_dist(shape)
-    output = dist <= radius
+    output = freqs <= radius
     return output
 
-def hipass_ideal_fft_mask(shape, radius, dist=None):
+def hipass_ideal_fft_mask(shape, radius, freqs=None, **kwargs):
     # if dist is None:
     #     dist = construct_filter_dist(shape)
-    output = dist > radius
+    output = freqs > radius
     return output
 
-def lopass_butter_fft_mask(shape, radius, dist=None):
-    # if dist is None:
-    #     dist = construct_filter_dist(shape)
-    output = dist <= radius
-    return output
+def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
+    lowcut = fc
 
-def hipass_butter_fft_mask(shape, radius, dist=None):
-    # if dist is None:
-    #     dist = construct_filter_dist(shape)
-    output = dist > radius
-    return output
+    # digital
+    filter_fs = lowcut * 2.0
+    nyq = 0.5 * filter_fs
+    low_digital = 0.5 * lowcut / (nyq * np.pi)
+    # high_digital = 0.5 * highcut / (nyq * np.pi)
+    b_digital, a_digital = scipy.signal.butter(order, Wn=low_digital, btype='lowpass', analog=False)
+    w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(freqs / filter_fs))
+
+    return h_digital
+
+def hipass_butter_fft_mask(shape, fc, freqs=None, order=2):
+    highcut = fc
+
+    # digital
+    filter_fs = highcut * 2.0
+    nyq = 0.5 * filter_fs
+    high_digital = 0.5 * highcut / (nyq * np.pi)
+    b_digital, a_digital = scipy.signal.butter(order, Wn=high_digital, btype='highpass', analog=False)
+    w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(freqs / filter_fs))
+
+    return h_digital
 
 def dist_from_center(shape, axis_size=None):
     if axis_size is None:
@@ -176,7 +189,7 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=
     :param freq_range:
     :return:
     """
-    if freq_range< 0:
+    if freq_range < 0:
         freq_range = None
 
     if fs is None:
@@ -200,9 +213,12 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=
     filt = power_filter(spectrum.shape, exponent, dist=freqs)
     # spectrum = apply_filter(spectrum, pfilter)
 
-    filt *= hipass_fcn(spectrum.shape, freq_start, dist=freqs)
+    # not sure if the abs is correct
+    if freq_start > 0:
+        filt *= np.abs(hipass_fcn(spectrum.shape, freq_start, freqs=freqs))
+
     if freq_range is not None:
-        filt *= lopass_fcn(spectrum.shape, freq_start + freq_range, dist=freqs)
+        filt *= np.abs(lopass_fcn(spectrum.shape, freq_start + freq_range, freqs=freqs))
     spectrum = apply_filter(spectrum, filt)
     # spectrum *= filt
     # spectrum = np.fft.ifftshift(shspectrum)
