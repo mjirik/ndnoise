@@ -262,28 +262,73 @@ class MyTestCase(unittest.TestCase):
 
         ndnoise.show(signal, filter, spectrum, log_view=True)
 
-    @unittest.skip("incomplete")
+    # @unittest.skip("incomplete")
     def test_2d_butter(self):
         import scipy
         import scipy.signal
 
         # fs = 100.0
-        # lowcut = 0
-        # highcut = 10
-        # nyq = 0.5 * fs
-        # low = lowcut / nyq
-        # high = highcut / nyq
+
+
+
+        area_size =  [100, 150]
+        data_sampling = [0.01, 0.01]
+        # filter fs defines accuracy of filter computation
+        filter_fs = 1.0 / np.mean(data_sampling)
         order = 2
-        low = 10
-        high = 15
+        # low = 10
+        # high = 15
+
+
+
+        lowcut = 30
+        highcut = 50
+        filter_fs = highcut * 2.0
+        nyq = 0.5 * filter_fs
+        low = 0.5 * lowcut / nyq
+        high = 0.5 * highcut / nyq
+
+        # 1.0 * nyq = highcut
+        # nyq = highcut
+        # 0.5 * filterfs = highcut
+
+
+        # nyq = highcut / high
+        # 0.5 * filter_fs = 1.0 / high
+        # filter_fs = 2.0 / high
         # TODO why is there problem with frequeny# TODO why is there problem with frequeny??
 
         # worN = np.asarray([[0, 5 , 10], [1, 5, 9], [1, 4, 10]])
-        worN = filtration.fftfreq([100, 150], [0.01, 0.01])
-        b, a = scipy.signal.butter(order, [low, high], btype='band')
-        w, h = response = scipy.signal.freqs(a, b, worN=worN)
-        # plt.plot(w, abs(h))
+        worN = filtration.fftfreq(area_size, data_sampling)
+        plt.figure()
+        plt.subplot(321)
+        plt.imshow(worN)
+        plt.colorbar()
+
+        plt.subplot(322)
+        gain = 1 / np.sqrt(1 + (worN / highcut)**(2.0 * order))
+        plt.imshow(abs(gain))
+        plt.colorbar()
+
+
+        b, a = scipy.signal.butter(order, Wn=[low, high], btype='band', analog=True)
+        w, h = response = scipy.signal.freqs(b, a)
+
+        plt.subplot(324)
+        plt.plot(w * filter_fs, abs(h))
+
+        w, h = response = scipy.signal.freqs(b, a, worN=(worN / filter_fs))
+        plt.subplot(325)
+        plt.imshow(w)
+        plt.colorbar()
+        plt.subplot(326)
         plt.imshow(abs(h))
+        plt.colorbar()
+
+
+        plt.subplot(323)
+        plt.imshow(w * filter_fs)
+        plt.colorbar()
         plt.show()
         # y = scipy.signal.lfilter(b, a, data)
 

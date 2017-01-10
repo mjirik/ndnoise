@@ -79,13 +79,13 @@ class MyTestCase(unittest.TestCase):
             [100,102,103],
             sample_spacing=[1,1,1],
             random_generator_seed=5,
-            lambda_start=10,
-            lambda_range=10,
+            lambda_start=50,
+            lambda_range=50,
             exponent=0.0
         )
 
-        # plt.imshow(noise[5,:,:], cmap="gray")
-        # plt.show()
+        plt.imshow(noise[5,:,:], cmap="gray")
+        plt.show()
 
 
 if __name__ == '__main__':
