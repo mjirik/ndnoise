@@ -83,12 +83,11 @@ def hipass_ideal_fft_mask(shape, radius, freqs=None, **kwargs):
     return output
 
 def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
-    lowcut = fc
-
     # digital
-    filter_fs = lowcut * 2.0
+    filter_fs = np.max(freqs)
+    # filter_fs = fc * 2.0
     nyq = 0.5 * filter_fs
-    low_digital = 0.5 * lowcut / (nyq * np.pi)
+    low_digital = 0.5 * fc / (nyq * np.pi)
     # high_digital = 0.5 * highcut / (nyq * np.pi)
     b_digital, a_digital = scipy.signal.butter(order, Wn=low_digital, btype='lowpass', analog=False)
     w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(freqs / filter_fs))
@@ -96,12 +95,11 @@ def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
     return h_digital
 
 def hipass_butter_fft_mask(shape, fc, freqs=None, order=2):
-    highcut = fc
-
     # digital
-    filter_fs = highcut * 2.0
+    filter_fs = np.max(freqs)
+    # filter_fs = fc * 2.0
     nyq = 0.5 * filter_fs
-    high_digital = 0.5 * highcut / (nyq * np.pi)
+    high_digital = 0.5 * fc / (nyq * np.pi)
     b_digital, a_digital = scipy.signal.butter(order, Wn=high_digital, btype='highpass', analog=False)
     w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(freqs / filter_fs))
 
@@ -226,42 +224,49 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_range=
     signal = np.real(np.fft.ifftn(spectrum))
     return signal, filt, spectrum, freqs
 
-def show(real_signal, filter=None, spectrum=None, log_view=False):
+def show(real_signal, filter=None, spectrum=None, freqs=None, log_view=False):
     import matplotlib.pyplot as plt
 
     # plt.gray()
-    ax = plt.subplot(231)
+    plt.subplot(331)
     plt.imshow(real_signal, cmap="gray")
     plt.colorbar()
-    ax.set_title("signal")
+
+    plt.title("signal")
 
     # shfilter = np.fft.fftshift(filter)
-    ax = plt.subplot(232)
-    plt.imshow(np.abs(filter))
+    plt.subplot(332)
+    plt.imshow(np.abs(np.fft.fftshift(filter)))
     plt.colorbar()
-    ax.set_title("filter")
+    plt.title("filter")
+
+    if freqs is not None:
+        ax = plt.subplot(333)
+        plt.imshow(np.abs(np.fft.fftshift(freqs)))
+        plt.colorbar()
+        ax.set_title("freqs")
 
     shspecturm = np.fft.fftshift(spectrum)
     if log_view:
         shspecturm = np.log(shspecturm)
 
 
-    ax = plt.subplot(233)
-    ax.imshow(np.abs(shspecturm))
+    plt.subplot(334)
+    plt.imshow(np.abs(shspecturm))
     plt.colorbar()
-    ax.set_title("abs")
+    plt.title("abs")
 
-    ax = plt.subplot(234)
-    ax.imshow(np.angle(shspecturm))
+    plt.subplot(335)
+    plt.imshow(np.angle(shspecturm))
     plt.colorbar()
-    ax.set_title("angle")
+    plt.title("angle")
 
-    ax = plt.subplot(235)
+    ax = plt.subplot(337)
     ax.imshow(np.real(shspecturm))
     plt.colorbar()
     ax.set_title("real")
 
-    ax = plt.subplot(236)
+    ax = plt.subplot(338)
     ax.imshow(np.imag(shspecturm))
     plt.colorbar()
     ax.set_title("imag")

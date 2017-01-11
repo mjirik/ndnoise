@@ -240,9 +240,39 @@ class MyTestCase(unittest.TestCase):
         )
         signal, filter, spectrum, freqs = out
 
-        ndnoise.show(signal, filter, spectrum, log_view=True)
+        ndnoise.show(signal, filter, spectrum, freqs=freqs, log_view=True)
         # plt.show()
         # self.assertEqual(True, False)
+
+    def test_lopass_butter_fft_mask(self):
+
+        import itertools
+        shapes = [[512, 512], [10, 15], [10, 100], [15, 15, 15]]
+        fcs = [0.01, 0.001, 0.5, 9, 5, 60]
+        spacings = [[1, 1], [0.1, 0.1], [0.5, 0.1], [5.2, 15.1], [1., 2., 3.], [0.1, 0.15, 10.1]]
+        orders = [2, 3, 5]
+        for shape, fc, spacing, order in itertools.product(shapes, fcs, spacings, orders):
+            if len(shape) == len(spacing):
+                freqs = filtration.fftfreq(shape, spacing=spacing)
+                fmask = filtration.lopass_butter_fft_mask(shape, fc, freqs, order)
+
+                himask = freqs > (1.5 * fc)
+                lower = np.abs(fmask) < (0.5 * 2**0.5)
+
+                # if len(shape) == 2:
+                #     plt.subplot(221)
+                #     plt.imshow(np.abs(fmask))
+                #     plt.subplot(222)
+                #     plt.imshow(freqs)
+                #     plt.suptitle(str(shape) + " " +str(fc) + " " + str(spacing) + " " + str(order))
+                #
+                #     plt.subplot(223)
+                #     plt.imshow(lower)
+                #
+                #     plt.subplot(224)
+                #     plt.imshow(himask)
+                #     plt.show()
+                self.assertTrue(np.all(lower[himask]))
 
     def test_lena_filter_butter(self):
         import scipy.misc
@@ -255,12 +285,13 @@ class MyTestCase(unittest.TestCase):
             spectrum,
             freq_start=0,
             freq_range=0.01,
-            exponent=+0.0001,
+            exponent=0,#+0.0001,
             filter_type="butter"
         )
         signal, filter, spectrum, freqs = out
 
-        ndnoise.show(signal, filter, spectrum, log_view=True)
+        plt.figure(figsize=(20,10))
+        ndnoise.show(signal, filter, spectrum, freqs=freqs, log_view=True)
         plt.show()
 
     # @unittest.skip("incomplete")
