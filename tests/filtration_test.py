@@ -235,7 +235,7 @@ class MyTestCase(unittest.TestCase):
         out = filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
-            freq_range=0.1,
+            freq_stop=0.1,
             exponent=0.1
         )
         signal, filter, spectrum, freqs = out
@@ -291,7 +291,7 @@ class MyTestCase(unittest.TestCase):
         out = filtration.spectrum_filtration(
             spectrum,
             freq_start=0,
-            freq_range=0.01,
+            freq_stop=0.01,
             exponent=0,#+0.0001,
             filter_type="butter"
         )

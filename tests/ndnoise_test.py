@@ -32,7 +32,7 @@ class MyTestCase(unittest.TestCase):
             spectrum,
             fs=[0.1, 0.5],
             freq_start=0,
-            freq_range=10,
+            freq_stop=10,
             exponent=-1.5
         )
         signal, filter, spectrum, freqs = out
@@ -50,7 +50,7 @@ class MyTestCase(unittest.TestCase):
             [100,102,103],
             random_generator_seed=5,
             freq_start=0.1,
-            freq_range=2/10.0,
+            freq_stop=2 / 10.0,
             exponent=1.0,
             return_spectrum=True
         )
@@ -79,12 +79,15 @@ class MyTestCase(unittest.TestCase):
             [100,102,103],
             sample_spacing=[1,1,1],
             random_generator_seed=5,
-            lambda_start=50,
-            lambda_range=50,
+            lambda_start=20,
+            lambda_stop=22,
             exponent=0.0
         )
-
+        plt.figure()
+        plt.subplot(121)
         plt.imshow(noise[5,:,:], cmap="gray")
+        plt.subplot(122)
+        plt.imshow(np.abs((np.fft.fft(noise)))[0,:,:])
         # plt.show()
 
 

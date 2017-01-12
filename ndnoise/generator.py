@@ -9,30 +9,38 @@ import numpy as np
 import filtration
 
 
-def noises(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_range=1, **kwargs):
+def noises(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_stop=1, **kwargs):
     """
     generate noise based on space properties
     :return:
     """
     if sample_spacing is None:
         sample_spacing = np.ones([1, len(shape)])
-
     sample_spacing = np.asarray(sample_spacing)
-    freq_start = 1.0 / lambda_start
-    freq_range = 1.0 / lambda_range
     sampling_frequency = 1.0 / sample_spacing
+
+    if lambda_start is None or lambda_start == 0:
+        freq_stop = None
+    else:
+        freq_stop = 1.0 / lambda_start
+
+    if lambda_stop is None or lambda_stop == 0:
+        freq_start = None
+    else:
+        freq_start = 1.0 / lambda_stop
+
     retval = noisef(
         shape,
         sampling_frequency=sampling_frequency,
         exponent=exponent,
         freq_start=freq_start,
-        freq_range=freq_range,
+        freq_stop=freq_stop,
         **kwargs
     )
     return retval
 
 
-def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_range=-1, spectrum=None):
+def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_stop=-1, spectrum=None):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -61,7 +69,7 @@ def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generat
         fs=sampling_frequency,
         exponent=exponent,
         freq_start=freq_start,
-        freq_range=freq_range
+        freq_stop=freq_stop
     )
 
     if return_spectrum:
