@@ -37,11 +37,13 @@ requirements:
     - setuptools
     - numpy
     - scipy
+    - matplotlib
 
   run:
     - python
     - numpy
     - scipy
+    - matplotlib
 
 test:
   # Python imports
