@@ -19,7 +19,7 @@ class MyTestCase(unittest.TestCase):
         b, a = scipy.signal.butter(4, [0, 10000], btype='band', analog=True)
         w, h = scipy.signal.freqs(b, a, worN=range(1000, 2000))
         plt.plot(w, abs(h))
-        plt.show()
+        # plt.show()
 
     def test_voxelsize(self):
         import scipy.misc
@@ -85,7 +85,7 @@ class MyTestCase(unittest.TestCase):
         )
 
         plt.imshow(noise[5,:,:], cmap="gray")
-        plt.show()
+        # plt.show()
 
 
 if __name__ == '__main__':

@@ -245,6 +245,7 @@ class MyTestCase(unittest.TestCase):
         # self.assertEqual(True, False)
 
     def test_lopass_butter_fft_mask(self):
+        safety_zone = 0.1
 
         import itertools
         shapes = [[512, 512], [10, 15], [10, 100], [15, 15, 15]]
@@ -256,23 +257,29 @@ class MyTestCase(unittest.TestCase):
                 freqs = filtration.fftfreq(shape, spacing=spacing)
                 fmask = filtration.lopass_butter_fft_mask(shape, fc, freqs, order)
 
-                himask = freqs > (1.5 * fc)
-                lower = np.abs(fmask) < (0.5 * 2**0.5)
+                himask = freqs > (1.0 * fc)
+                lower = np.abs(fmask) < ((0.5 + safety_zone) * 2**0.5)
+                higher = np.abs(fmask) > ((0.5 - safety_zone) * 2**0.5)
+                msg = str(shape) + " " +str(fc) + " " + str(spacing) + " " + str(order)
 
                 # if len(shape) == 2:
-                #     plt.subplot(221)
+                #     plt.subplot(321)
                 #     plt.imshow(np.abs(fmask))
-                #     plt.subplot(222)
+                #     plt.subplot(322)
                 #     plt.imshow(freqs)
-                #     plt.suptitle(str(shape) + " " +str(fc) + " " + str(spacing) + " " + str(order))
+                #     plt.suptitle(msg)
                 #
-                #     plt.subplot(223)
-                #     plt.imshow(lower)
-                #
-                #     plt.subplot(224)
+                #     plt.subplot(323)
                 #     plt.imshow(himask)
+                #
+                #     plt.subplot(325)
+                #     plt.imshow(lower)
+                #     plt.subplot(326)
+                #     plt.imshow(higher)
+                #
                 #     plt.show()
-                self.assertTrue(np.all(lower[himask]))
+                self.assertTrue(np.all(lower[himask]), msg=msg)
+                # self.assertTrue(np.all(higher[np.invert(himask)]), msg=msg)
 
     def test_lena_filter_butter(self):
         import scipy.misc
@@ -290,9 +297,9 @@ class MyTestCase(unittest.TestCase):
         )
         signal, filter, spectrum, freqs = out
 
-        plt.figure(figsize=(20,10))
+        # plt.figure(figsize=(20,10))
         ndnoise.show(signal, filter, spectrum, freqs=freqs, log_view=True)
-        plt.show()
+        # plt.show()
 
     # @unittest.skip("incomplete")
     def test_2d_butter(self):
@@ -352,59 +359,45 @@ class MyTestCase(unittest.TestCase):
         # 2D spectrum of digital filter
         w_analog, h_analog = scipy.signal.freqs(b_analog, a_analog, worN=(worN / filter_fs))
 
-        plt.figure(figsize=(20, 10))
-        plt.subplot(331)
-        plt.imshow(worN)
-        plt.colorbar()
-        plt.title("freqs (filtration.fftfreq)")
-
-        plt.subplot(332)
-        plt.imshow(w_digital)
-        plt.title("normalized freqs 2D digital")
-        plt.colorbar()
-
-        plt.subplot(333)
-        plt.imshow(w_digital * filter_fs)
-        plt.colorbar()
-        plt.title("un-normalized freqs 2D digital")
-
-
-        plt.subplot(334)
-        plt.imshow(abs(gain))
-        plt.colorbar()
-        plt.title("gain")
-
-
-        # b, a = scipy.signal.butter(order, Wn=[low, high], btype='band', analog=True)
-        # w, h = response = scipy.signal.freqs(b, a)
-
-
-
-        # w, h = response = scipy.signal.freqs(b, a, worN=(worN / filter_fs))
-
-
-
-        plt.subplot(335)
-        plt.imshow(abs(h_digital))
-        plt.colorbar()
-        plt.title("2D digital spectrum")
-
-
-
-        plt.subplot(336)
-        plt.imshow(abs(h_analog))
-        plt.colorbar()
-        plt.title("2D analog spectrum")
-
-        plt.subplot(337)
-        plt.plot(w_digital_1d * filter_fs, abs(h_digital_1d))
-        plt.title("1D spectrum")
-        plt.axvline(lowcut, color='r')
-        plt.axvline(highcut, color='r')
-        plt.axhline(1/(2**0.5), color='r')
-
-        plt.show()
-        # y = scipy.signal.lfilter(b, a, data)
+        # plt.figure(figsize=(20, 10))
+        # plt.subplot(331)
+        # plt.imshow(worN)
+        # plt.colorbar()
+        # plt.title("freqs (filtration.fftfreq)")
+        #
+        # plt.subplot(332)
+        # plt.imshow(w_digital)
+        # plt.title("normalized freqs 2D digital")
+        # plt.colorbar()
+        #
+        # plt.subplot(333)
+        # plt.imshow(w_digital * filter_fs)
+        # plt.colorbar()
+        # plt.title("un-normalized freqs 2D digital")
+        #
+        # plt.subplot(334)
+        # plt.imshow(abs(gain))
+        # plt.colorbar()
+        # plt.title("gain")
+        #
+        # plt.subplot(335)
+        # plt.imshow(abs(h_digital))
+        # plt.colorbar()
+        # plt.title("2D digital spectrum")
+        #
+        # plt.subplot(336)
+        # plt.imshow(abs(h_analog))
+        # plt.colorbar()
+        # plt.title("2D analog spectrum")
+        #
+        # plt.subplot(337)
+        # plt.plot(w_digital_1d * filter_fs, abs(h_digital_1d))
+        # plt.title("1D spectrum")
+        # plt.axvline(lowcut, color='r')
+        # plt.axvline(highcut, color='r')
+        # plt.axhline(1/(2**0.5), color='r')
+        #
+        # plt.show()
 
 if __name__ == '__main__':
     unittest.main()

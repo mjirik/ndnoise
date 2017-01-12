@@ -84,7 +84,7 @@ def hipass_ideal_fft_mask(shape, radius, freqs=None, **kwargs):
 
 def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
     # digital
-    filter_fs = np.max(freqs)
+    filter_fs = np.max([fc, np.max(freqs)])
     # filter_fs = fc * 2.0
     nyq = 0.5 * filter_fs
     low_digital = 0.5 * fc / (nyq * np.pi)
@@ -96,7 +96,7 @@ def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
 
 def hipass_butter_fft_mask(shape, fc, freqs=None, order=2):
     # digital
-    filter_fs = np.max(freqs)
+    filter_fs = np.max([fc, np.max(freqs)])
     # filter_fs = fc * 2.0
     nyq = 0.5 * filter_fs
     high_digital = 0.5 * fc / (nyq * np.pi)
