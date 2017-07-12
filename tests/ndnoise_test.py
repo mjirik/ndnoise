@@ -83,12 +83,27 @@ class MyTestCase(unittest.TestCase):
             lambda_stop=22,
             exponent=0.0
         )
+        return noise
+
+
+    def test_3d_noises_interactive(self):
+        noise = self.test_3d_noises()
         plt.figure()
         plt.subplot(121)
         plt.imshow(noise[5,:,:], cmap="gray")
         plt.subplot(122)
         plt.imshow(np.abs((np.fft.fft(noise)))[0,:,:])
         # plt.show()
+
+
+    #def test_3d_noises_profile(self):
+    #
+    #    import profile
+    #    def fcn():
+    #        return self.test_3d_noises()
+    #
+    #    profile.run("print dir()")
+    #    self.assertTrue(False)
 
 
 if __name__ == '__main__':

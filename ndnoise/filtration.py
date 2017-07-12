@@ -82,6 +82,18 @@ def hipass_ideal_fft_mask(shape, radius, freqs=None, **kwargs):
     output = freqs > radius
     return output
 
+def bandpass_butter_fft_mask(shape, flow, fhigh, freqs=None, order=2):
+    # TODO implement this function
+
+    # digital
+    filter_fs = np.max([fc, np.max(freqs)])
+    # filter_fs = fc * 2.0
+    nyq = 0.5 * filter_fs
+    low_digital = 0.5 * fc / (nyq * np.pi)
+    # high_digital = 0.5 * highcut / (nyq * np.pi)
+    b_digital, a_digital = scipy.signal.butter(order, Wn=low_digital, btype='lowpass', analog=False)
+    w_digital, h_digital = scipy.signal.freqz(b_digital, a_digital, worN=(freqs / filter_fs))
+
 def lopass_butter_fft_mask(shape, fc, freqs=None, order=2):
     # digital
     filter_fs = np.max([fc, np.max(freqs)])
@@ -168,6 +180,59 @@ def fftfreq(shape, spacing=None):
 
 
 
+def spectrum_analysis_3d(spectrum, fs=[1, 1, 1]):
+    spectrum = np.abs(spectrum)
+    voxelsize = 1.0 / np.asarray(fs)
+    freqs = fftfreq(spectrum.shape, spacing=voxelsize)
+
+    # along axis
+    fr1 = freqs[:,0]
+    sp1 = spectrum[:, 0]
+    plt.plot(fr1, sp1)
+    plt.show()
+
+
+
+
+    # round
+    voxelvol = np.prod(voxelsize)
+    surface = 4 * np.pi * freqs
+
+    spf = spectrum.flatten()
+    freqsf = freqs.flatten()
+
+
+    unq_freqs = np.unique(freqsf)
+    freqs_spect = dict(zip(unq_freqs, [0.0] * len(unq_freqs)))
+    for si, fi in zip(spf, freqsf):
+        freqs_spect[fi] += si #* voxelvol / (4 * np.pi * fi)
+
+
+
+
+    sp = freqs_spect.values()
+    fr = freqs_spect.keys()
+    fr_sp = sorted(zip(fr, sp))
+    fr, sp = zip(*fr_sp)
+
+    sp = list(sp)
+    # sp is density function
+
+    for i in range(1, len(unq_freqs)):
+        sp[i] += sp [i - 1]
+
+    correction = voxelvol / (4 * np.pi * (np.asarray(fr)**2 + np.mean(voxelsize)))
+    correction = voxelvol / (2 * np.pi * (np.asarray(fr) + np.mean(voxelsize)))
+
+    # sp is now distribution function
+
+    plt.figure()
+    plt.suptitle(str(np.max(freqs)))
+    plt.plot(fr, sp * correction)
+    plt.show()
+
+
+
 
 
 def P2R(radii, angles):
@@ -187,6 +252,8 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_stop=N
     :param freq_stop:
     :return:
     """
+    log = "spectrum_filtration() - begin"
+    logger.debug(log)
     if freq_stop < 0:
         freq_stop = None
 
@@ -196,7 +263,34 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_stop=N
     if fs is None:
         fs = np.ones(len(spectrum.shape))
 
+
     voxelsize = 1.0 / np.asarray(fs)
+
+    # dist = dist_from_center(spectrum.shape, axis_size=voxelsize)
+    freqs = fftfreq(spectrum.shape, spacing=voxelsize)
+
+    # spectrum = apply_filter(spectrum, pfilter)
+
+    filt = get_freq_filter_mask(spectrum.shape, exponent, freq_start, freq_stop, freqs,
+                                filter_type
+                                )
+
+    log = "spectrum_filtration() - before apply_filter"
+    logger.debug(log)
+    spectrum = apply_filter(spectrum, filt)
+    # spectrum *= filt
+    # spectrum = np.fft.ifftshift(shspectrum)
+    signal = get_real_ifft(spectrum)
+    log = "spectrum_filtration() - end"
+    logger.debug(log)
+
+    return signal, filt, spectrum, freqs
+
+def get_real_ifft(spectrum):
+    return np.real(np.fft.ifftn(spectrum))
+
+def get_freq_filter_mask(spectrum_shape, exponent, freq_start, freq_stop, freqs, filter_type):
+    filter_type = "ideal"
 
     if filter_type is "ideal":
         lopass_fcn = lopass_ideal_fft_mask
@@ -207,25 +301,16 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_stop=N
     else:
         logger.error("Unknown filter type")
 
-    # dist = dist_from_center(spectrum.shape, axis_size=voxelsize)
-    freqs = fftfreq(spectrum.shape, spacing=voxelsize)
-
     # shspectrum = np.fft.fftshift(spectrum)
-    filt = power_filter(spectrum.shape, exponent, dist=freqs)
-    # spectrum = apply_filter(spectrum, pfilter)
-
+    filt = power_filter(spectrum_shape, exponent, dist=freqs)
     # not sure if the abs is correct
     if freq_start is not None:
-        filt *= np.abs(hipass_fcn(spectrum.shape, freq_start, freqs=freqs))
+        filt *= np.abs(hipass_fcn(spectrum_shape, freq_start, freqs=freqs))
 
     if freq_stop is not None:
-        filt *= np.abs(lopass_fcn(spectrum.shape, freq_stop, freqs=freqs))
-    spectrum = apply_filter(spectrum, filt)
-    # spectrum *= filt
-    # spectrum = np.fft.ifftshift(shspectrum)
+        filt *= np.abs(lopass_fcn(spectrum_shape, freq_stop, freqs=freqs))
 
-    signal = np.real(np.fft.ifftn(spectrum))
-    return signal, filt, spectrum, freqs
+    return filt
 
 def show(real_signal, filter=None, spectrum=None, freqs=None, log_view=False):
     import matplotlib.pyplot as plt

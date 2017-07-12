@@ -399,5 +399,24 @@ class MyTestCase(unittest.TestCase):
         #
         # plt.show()
 
+    def test_image_spectrum_analysis(self):
+        import scipy.misc
+        lena = scipy.misc.ascent()
+        spectrum = np.fft.fftn(lena)
+
+        # spectrum = ndnoise.generator.generate_spectrum_seed([100, 100])
+        filtration.spectrum_analysis_3d(spectrum)
+
+        out = filtration.spectrum_filtration(
+            spectrum,
+            freq_start=0,
+            freq_stop=0.01,
+            exponent=0,#+0.0001,
+            filter_type="butter"
+        )
+        signal, filter, spectrum, freqs = out
+
+        # plt.figure(figsize=(20,10))
+        ndnoise.show(signal, filter, spectrum, freqs=freqs, log_view=True)
 if __name__ == '__main__':
     unittest.main()
