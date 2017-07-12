@@ -51,6 +51,7 @@ def noises_space(
         exponent=0.0,
         lambda_start=0,
         lambda_stop=1,
+        random_generator_seed=None,
         **kwargs
 ):
 
@@ -58,8 +59,10 @@ def noises_space(
     data1 = 0
     w0 = 0
     w1 = 0
+    if random_generator_seed is not None:
+        np.random.seed(seed=random_generator_seed)
 
-    lambda1 = lambda_stop * np.asarray(sample_spacing)
+    # lambda1 = lambda_stop * np.asarray(sample_spacing)
 
     if lambda_start is not None:
         lambda0 = lambda_start * np.asarray(sample_spacing)
@@ -80,9 +83,9 @@ def noises_space(
         w0 = w0 / wsum
         w1 = w1 / wsum
 
-    print w0, w1
-    print np.mean(data0), np.var(data0)
-    print np.mean(data1), np.var(data1)
+    # print w0, w1
+    # print np.mean(data0), np.var(data0)
+    # print np.mean(data1), np.var(data1)
 
     data = ( data0 * w0 +  data1 * w1)
 
@@ -139,8 +142,7 @@ def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generat
     """
     if sampling_frequency is None:
         sampling_frequency = np.ones(len(shape))
-        #fs = np.ones([1, len(shape)])
-
+        # fs = np.ones([1, len(shape)])
 
     if random_generator_seed is not None:
         np.random.seed(seed=random_generator_seed)
