@@ -86,6 +86,7 @@ class MyTestCase(unittest.TestCase):
         return noise
 
 
+    @unittest.skip("interactive")
     def test_3d_noises_interactive(self):
         noise = self.test_3d_noises()
         plt.figure()
