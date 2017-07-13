@@ -32,8 +32,8 @@ class MyTestCase(unittest.TestCase):
         out = ndnoise.filtration.spectrum_filtration(
             spectrum,
             fs=[0.1, 0.5],
-            freq_start=0,
-            freq_stop=10,
+            freq0=0,
+            freq1=10,
             exponent=-1.5
         )
         signal, filter, spectrum, freqs = out
@@ -50,8 +50,8 @@ class MyTestCase(unittest.TestCase):
         noise, filt, spectrum, freqs = ndnoise.noisef(
             [100,102,103],
             random_generator_seed=5,
-            freq_start=0.1,
-            freq_stop=2 / 10.0,
+            freq0=0.1,
+            freq1=2 / 10.0,
             exponent=1.0,
             return_spectrum=True
         )

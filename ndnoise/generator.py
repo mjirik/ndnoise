@@ -40,7 +40,7 @@ def noises(shape, sample_spacing=None, exponent=0, lambda0=0, lambda1=1, method=
 
     return noise
 
-def noise_normalization(data, std_factor=1.0):
+def ndimage_normalization(data, std_factor=1.0):
     data0n = (data - np.mean(data)) * 1.0 / (std_factor * np.var(data)**0.5)
     return data0n
 
@@ -65,18 +65,19 @@ def noises_space(
     # lambda1 = lambda_stop * np.asarray(sample_spacing)
 
     if lambda0 is not None:
-        lambda0_ = lambda0 / np.asarray(sample_spacing)
+        lambda0_px = lambda0 / np.asarray(sample_spacing)
         data0 = np.random.rand(*shape)
-        data0 = scipy.ndimage.filters.gaussian_filter(data0, sigma=lambda0_)
-        data0 = noise_normalization(data0)
+        data0 = scipy.ndimage.filters.gaussian_filter(data0, sigma=lambda0_px)
+        data0 = ndimage_normalization(data0)
         w0 = np.exp(exponent * lambda0)
 
     if lambda1 is not None:
-        lambda1_ = lambda1 / np.asarray(sample_spacing)
+        lambda1_px = lambda1 / np.asarray(sample_spacing)
         data1 = np.random.rand(*shape)
-        data1 = scipy.ndimage.filters.gaussian_filter(data1, sigma=lambda1_)
-        data1 = noise_normalization(data1)
+        data1 = scipy.ndimage.filters.gaussian_filter(data1, sigma=lambda1_px)
+        data1 = ndimage_normalization(data1)
         w1 = np.exp(exponent * lambda1)
+    logger.debug("lambda_px {} {}".format(lambda0_px, lambda1_px))
 
     wsum = w0 + w1
     if wsum > 0:
@@ -120,14 +121,14 @@ def noises_freq(shape, sample_spacing=None, exponent=0, lambda0=0, lambda1=1, **
         shape,
         sampling_frequency=sampling_frequency,
         exponent=exponent,
-        freq_start=freq_start,
-        freq_stop=freq_stop,
+        freq0=freq_start,
+        freq1=freq_stop,
         **kwargs
     )
     return retval
 
 
-def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq_start=0, freq_stop=-1, spectrum=None):
+def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generator_seed=None, exponent=0, freq0=0, freq1=-1, spectrum=None):
     """
     Generate noise based on FFT transformation. Complex ndarray is generated as a seed for fourier spectre.
     The specter is filtered based on power function of frequency. This is controled by exponent parameter.
@@ -154,8 +155,8 @@ def noisef(shape, sampling_frequency=None, return_spectrum=False, random_generat
         spectrum,
         fs=sampling_frequency,
         exponent=exponent,
-        freq_start=freq_start,
-        freq_stop=freq_stop
+        freq0=freq0,
+        freq1=freq1
     )
 
     if return_spectrum:

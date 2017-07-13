@@ -238,22 +238,22 @@ def P2R(radii, angles):
 def R2P(x):
     return np.abs(x), np.angle(x)
 
-def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_stop=None, filter_type="butter"):
+def spectrum_filtration(spectrum, fs=None, exponent=0, freq0=0, freq1=None, filter_type="butter"):
     """
     Filter spectrum based on frequency
     :param spectrum:
     :param exponent:
-    :param freq_start:
-    :param freq_stop:
+    :param freq0:
+    :param freq1:
     :return:
     """
     log = "spectrum_filtration() - begin"
     logger.debug(log)
-    if freq_stop < 0:
-        freq_stop = None
+    if freq1 < 0:
+        freq1 = None
 
-    if freq_start <= 0:
-        freq_start = None
+    if freq0 <= 0:
+        freq0 = None
 
     if fs is None:
         fs = np.ones(len(spectrum.shape))
@@ -266,7 +266,7 @@ def spectrum_filtration(spectrum, fs=None, exponent=0, freq_start=0, freq_stop=N
 
     # spectrum = apply_filter(spectrum, pfilter)
 
-    filt = get_freq_filter_mask(spectrum.shape, exponent, freq_start, freq_stop, freqs,
+    filt = get_freq_filter_mask(spectrum.shape, exponent, freq0, freq1, freqs,
                                 filter_type
                                 )
 
