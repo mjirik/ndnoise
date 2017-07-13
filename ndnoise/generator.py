@@ -78,9 +78,6 @@ def noises_space(
         data1 = ndimage_normalization(data1)
         w1 = np.exp(exponent * lambda1)
     logger.debug("lambda_px {} {}".format(lambda0_px, lambda1_px))
-    # todo remove fallowing line
-    print("lambda_px {} {}".format(lambda0_px, lambda1_px))
-
     wsum = w0 + w1
     if wsum > 0:
         w0 = w0 / wsum
@@ -91,6 +88,7 @@ def noises_space(
     # print np.mean(data1), np.var(data1)
 
     data = ( data0 * w0 +  data1 * w1)
+    logger.debug("w0, w1 {} {}".format(w0, w1))
 
     # plt.figure()
     # plt.imshow(data0[:,:,50], cmap="gray")
