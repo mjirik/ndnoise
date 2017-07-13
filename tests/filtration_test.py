@@ -225,6 +225,7 @@ class MyTestCase(unittest.TestCase):
             self.assertAlmostEquals(xi, exi)
 
 
+    # @unittest.skip("interactive")
     def test_lena_filter_ideal(self):
         import scipy.misc
         lena = scipy.misc.ascent()
@@ -399,6 +400,7 @@ class MyTestCase(unittest.TestCase):
         #
         # plt.show()
 
+    # @unittest.skip("interactive")
     def test_image_spectrum_analysis(self):
         import scipy.misc
         lena = scipy.misc.ascent()

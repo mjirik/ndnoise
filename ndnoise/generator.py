@@ -10,14 +10,14 @@ import scipy
 import filtration
 
 
-def noises(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_stop=1, method="space", **kwargs):
+def noises(shape, sample_spacing=None, exponent=0, lambda0=0, lambda1=1, method="space", **kwargs):
     """ Create noise based on space paramters.
 
     :param shape:
     :param sample_spacing: in space units like milimeters
     :param exponent:
-    :param lambda_start: wavelength of first noise
-    :param lambda_stop: wavelength of last noise
+    :param lambda0: wavelength of first noise
+    :param lambda1: wavelength of last noise
     :param method: use "space" or "freq" method. "freq" is more precise but slower.
     :param kwargs:
     :return:
@@ -26,8 +26,8 @@ def noises(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_stop=1
         shape=shape,
         sample_spacing=sample_spacing,
         exponent=exponent,
-        lambda_start=lambda_start,
-        lambda_stop=lambda_stop,
+        lambda0=lambda0,
+        lambda1=lambda1,
         **kwargs
     )
 
@@ -49,8 +49,8 @@ def noises_space(
         shape,
         sample_spacing=None,
         exponent=0.0,
-        lambda_start=0,
-        lambda_stop=1,
+        lambda0=0,
+        lambda1=1,
         random_generator_seed=None,
         **kwargs
 ):
@@ -64,19 +64,19 @@ def noises_space(
 
     # lambda1 = lambda_stop * np.asarray(sample_spacing)
 
-    if lambda_start is not None:
-        lambda0 = lambda_start * np.asarray(sample_spacing)
+    if lambda0 is not None:
+        lambda0_ = lambda0 / np.asarray(sample_spacing)
         data0 = np.random.rand(*shape)
-        data0 = scipy.ndimage.filters.gaussian_filter(data0, sigma=lambda0)
+        data0 = scipy.ndimage.filters.gaussian_filter(data0, sigma=lambda0_)
         data0 = noise_normalization(data0)
-        w0 = np.exp(exponent * lambda_start)
+        w0 = np.exp(exponent * lambda0)
 
-    if lambda_stop is not None:
-        lambda1 = lambda_stop * np.asarray(sample_spacing)
+    if lambda1 is not None:
+        lambda1_ = lambda1 / np.asarray(sample_spacing)
         data1 = np.random.rand(*shape)
-        data1 = scipy.ndimage.filters.gaussian_filter(data1, sigma=lambda1)
+        data1 = scipy.ndimage.filters.gaussian_filter(data1, sigma=lambda1_)
         data1 = noise_normalization(data1)
-        w1 = np.exp(exponent * lambda_stop)
+        w1 = np.exp(exponent * lambda1)
 
     wsum = w0 + w1
     if wsum > 0:
@@ -97,7 +97,7 @@ def noises_space(
     # plt.colorbar()
     return data
 
-def noises_freq(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_stop=1, **kwargs):
+def noises_freq(shape, sample_spacing=None, exponent=0, lambda0=0, lambda1=1, **kwargs):
     """Generate noise based on space properties using fft transforamtion.
     :return:
     """
@@ -106,15 +106,15 @@ def noises_freq(shape, sample_spacing=None, exponent=0, lambda_start=0, lambda_s
     sample_spacing = np.asarray(sample_spacing)
     sampling_frequency = 1.0 / sample_spacing
 
-    if lambda_start is None or lambda_start == 0:
+    if lambda0 is None or lambda0 == 0:
         freq_stop = None
     else:
-        freq_stop = 1.0 / lambda_start
+        freq_stop = 1.0 / lambda0
 
-    if lambda_stop is None or lambda_stop == 0:
+    if lambda1 is None or lambda1 == 0:
         freq_start = None
     else:
-        freq_start = 1.0 / lambda_stop
+        freq_start = 1.0 / lambda1
 
     retval = noisef(
         shape,

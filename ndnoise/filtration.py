@@ -188,11 +188,9 @@ def spectrum_analysis_3d(spectrum, fs=[1, 1, 1]):
     # along axis
     fr1 = freqs[:,0]
     sp1 = spectrum[:, 0]
+    plt.subplot(121)
     plt.plot(fr1, sp1)
-    plt.show()
-
-
-
+    # plt.show()
 
     # round
     voxelvol = np.prod(voxelsize)
@@ -201,13 +199,10 @@ def spectrum_analysis_3d(spectrum, fs=[1, 1, 1]):
     spf = spectrum.flatten()
     freqsf = freqs.flatten()
 
-
     unq_freqs = np.unique(freqsf)
     freqs_spect = dict(zip(unq_freqs, [0.0] * len(unq_freqs)))
     for si, fi in zip(spf, freqsf):
         freqs_spect[fi] += si #* voxelvol / (4 * np.pi * fi)
-
-
 
 
     sp = freqs_spect.values()
@@ -226,10 +221,10 @@ def spectrum_analysis_3d(spectrum, fs=[1, 1, 1]):
 
     # sp is now distribution function
 
-    plt.figure()
+    plt.subplot(121)
     plt.suptitle(str(np.max(freqs)))
     plt.plot(fr, sp * correction)
-    plt.show()
+    #plt.show()
 
 
 

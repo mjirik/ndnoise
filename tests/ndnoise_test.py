@@ -15,6 +15,7 @@ class MyTestCase(unittest.TestCase):
         # ndnoise.show(noise, filter, spectrum)
         # self.assertEqual(True, False)
 
+    @unittest.skip("interactive")
     def test_butter(self):
         b, a = scipy.signal.butter(4, [0, 10000], btype='band', analog=True)
         w, h = scipy.signal.freqs(b, a, worN=range(1000, 2000))
@@ -79,8 +80,8 @@ class MyTestCase(unittest.TestCase):
             [100,102,103],
             sample_spacing=[1,1,1],
             random_generator_seed=5,
-            lambda_start=20,
-            lambda_stop=22,
+            lambda0=20,
+            lambda1=22,
             exponent=0.0
         )
         return noise
