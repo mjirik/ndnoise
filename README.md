@@ -4,6 +4,24 @@
 # ndnoise
 Noise generator
 
+# Example
+
+```python
+import ndnoise
+from matplotlib import pyplot as plt
+
+noise = ndnoise.generator.noises(
+        [201, 202, 203],
+        sample_spacing=[1,1,1],
+        random_generator_seed=5,
+        lambda0=1,
+        lambda1=16,
+        exponent=0,
+        method="space"
+    )
+plt.imshow(noise[:,:,100])
+```
+
 
 # References
 
