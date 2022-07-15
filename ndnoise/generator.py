@@ -63,6 +63,8 @@ def noises_space(
         **kwargs
 ):
     """
+    Noise is generated from two components with parameter lambda0 and lambda1
+    
     use_fft: ("auto", "lambda0", "lambda1", "both", "none") auto: use fft if lambda is > 5
     """
 
