@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 import scipy
+import datetime
 from . import filtration
 
 def noises(shape, sample_spacing=None, exponent=0, lambda0=0, lambda1=1, method="space", **kwargs):
