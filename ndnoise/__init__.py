@@ -1,2 +1,2 @@
-from .generator import noisef, noises
+from .generator import noises
 from .filtration import show
